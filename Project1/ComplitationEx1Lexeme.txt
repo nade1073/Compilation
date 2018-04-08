@@ -1,0 +1,117 @@
+%{
+#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include "Token.h"
+#include <string.h>
+int lineNumber=1;
+
+%}
+%x COMMENTS
+%name lex
+
+UPPERLETTER [A-Z]
+LOWERLETTER	[a-z]
+DIGIT       [0-9]
+UNDERSCORE "_"
+
+ID ({LOWERLETTER}|{UPPERLETTER})+((({UNDERSCORE})({LOWERLETTER}|{UPPERLETTER}|{DIGIT}))|{LOWERLETTER}|{DIGIT}|{UPPERLETTER})*
+INT_NUM 0|([1-9]{DIGIT}*)
+REL_NUM (0.{DIGIT}+)|([1-9]{DIGIT}*.{DIGIT}+)
+
+
+%%
+
+"--"  BEGIN(COMMENTS);
+<COMMENTS>[^\n]  
+<COMMENTS><<EOF>> {BEGIN(0);}     
+<COMMENTS>\n  {lineNumber++;BEGIN(0);}
+{INT_NUM}	{create_and_store_token(INT_NUM, lineNumber, yytext);return 1;}
+{REL_NUM}	{create_and_store_token(REL_NUM, lineNumber, yytext);return 1;}
+"+"	{create_and_store_token(AR_OP_ADDITION, lineNumber, yytext);return 1;}
+"-"	{create_and_store_token(AR_OP_SUBTRACTION, lineNumber, yytext);return 1;}
+"*"	{create_and_store_token(AR_OP_MULTIPLICATION, lineNumber, yytext);return 1;}
+"/"	{create_and_store_token(AR_OP_DIVISION, lineNumber, yytext);return 1;}
+"**"	{create_and_store_token(AR_OP_POWER, lineNumber, yytext);return 1;}
+"++"	{create_and_store_token(UNARY_OP_INCREMENT, lineNumber, yytext); return 1;}
+"&"	{create_and_store_token(UNARY_OP_AMP, lineNumber, yytext);return 1;}
+"<"	{create_and_store_token(REL_OP_LESS, lineNumber, yytext);return 1;}
+"<="	{create_and_store_token(REL_OP_EQUAL_OR_LESS, lineNumber, yytext);return 1;}
+"=="	{create_and_store_token(REL_OP_EQUAL, lineNumber, yytext);return 1;}
+"!="	{create_and_store_token(REL_OP_NOT_EQUAL, lineNumber, yytext);return 1;}
+">"	{create_and_store_token(REL_OP_GREATER, lineNumber, yytext);return 1;}
+">="	{create_and_store_token(REL_OP_EQUAL_OR_GREATER, lineNumber, yytext);return 1;}
+"="	{create_and_store_token(ASSIGNMENT, lineNumber, yytext);return 1;}
+"^"	{create_and_store_token(POINTER, lineNumber, yytext);return 1;}
+"block"		{create_and_store_token(KEYWORD_BLOCK, lineNumber, yytext);return 1;}
+"begin"		{create_and_store_token(KEYWORD_BEGIN, lineNumber, yytext);return 1;}
+"end"		{create_and_store_token(KEYWORD_END, lineNumber, yytext);return 1;}
+"type"		{create_and_store_token(KEYWORD_TYPE, lineNumber, yytext);return 1;}
+"is"		{create_and_store_token(KEYWORD_IS, lineNumber, yytext);return 1;}
+"integer"	{create_and_store_token(KEYWORD_INTEGER, lineNumber, yytext);return 1;}
+"real" 		{create_and_store_token(KEYWORD_REAL, lineNumber, yytext);return 1;}
+"array"		{create_and_store_token(KEYWORD_ARRAY, lineNumber, yytext);return 1;}
+"of"		{create_and_store_token(KEYWORD_OF, lineNumber, yytext);return 1;}
+"when"		{create_and_store_token(KEYWORD_WHEN, lineNumber, yytext);return 1;}
+"do"		{create_and_store_token(KEYWORD_DO, lineNumber, yytext);return 1;}
+"default"	{create_and_store_token(KEYWORD_DEFAULT, lineNumber, yytext);return 1;}
+"end_when"	{create_and_store_token(KEYWORD_END_WHEN, lineNumber, yytext);	return 1;}
+"for"		{create_and_store_token(KEYWORD_FOR, lineNumber, yytext);return 1;}
+"end_for"	{create_and_store_token(KEYWORD_END_FOR, lineNumber, yytext);return 1;}
+"free"		{create_and_store_token(KEYWORD_FREE, lineNumber, yytext);return 1;}
+"size_of"	{create_and_store_token(KEYWORD_SIZE_OF, lineNumber, yytext);return 1;}
+{ID}		{create_and_store_token(ID, lineNumber, yytext);return 1;}
+":"		{create_and_store_token(SEPERATION_SIGN_COLON, lineNumber, yytext);return 1;}
+";"		{create_and_store_token(SEPERATION_SIGN_SEMICOLON, lineNumber, yytext);return 1;}
+"("		{create_and_store_token(SEPERATION_SIGN_PARENT_OPEN, lineNumber, yytext);return 1;}
+")"		{create_and_store_token(SEPERATION_SIGN_PARENT_CLOSE, lineNumber, yytext);return 1;}
+"["		{create_and_store_token(SEPERATION_SIGN_BRACKET_OPEN, lineNumber, yytext);return 1;}
+"]"		{create_and_store_token(SEPERATION_SIGN_BRACKET_CLOSE, lineNumber, yytext);return 1;}
+\n		{lineNumber++;}
+" "		
+\t		
+\b		
+.		{fprintf(yyout,"The character '%s' at line: %d does not begin any legal token in the language.\n", yytext, lineNumber);}
+<<EOF>>		{create_and_store_token(END_OF_FILE, lineNumber, yytext);return 1;}
+%%
+void executeFile(char*, char*);
+void main()
+{
+	executeFile("C:\\temp\\test1.txt", "C:\\temp\\test1_204233456_308548569_lex.txt");
+	resetVarsAndList();
+	executeFile("C:\\temp\\test2.txt", "C:\\temp\\test2_204233456_308548569_lex.txt");
+	resetVarsAndList();
+}
+
+void executeFile(char *inputFile, char *outputFile)
+{
+		lineNumber=1;
+		Token* currentToken=NULL;
+		printf("Trying to open input file '%s': \n",inputFile);
+		yyin = fopen(inputFile,"r");
+		if (!yyin)
+		{
+			printf("No input file was found\n");
+			return;
+		}
+		printf("Trying to open output file '%s': \n",outputFile);
+		yyout = fopen(outputFile,"w");
+		if (!yyout)
+		{
+			printf("No output file was found \n");
+			return;
+		}
+		
+				do
+				{
+				currentToken=next_token();
+				fprintf(yyout,"Token of kind '{%s}', was found at line: {%d}, lexeme: '{%s}'. \n", stringFromeTOKENS(currentToken->kind), currentToken->lineNumber, currentToken->lexeme);				
+				}while(currentToken->kind!= END_OF_FILE);
+		
+		printf("File Execute finished\n");
+		printf("Closing input file \n");
+		fclose(yyin);
+		printf("Closing output file \n");
+		fclose(yyout);
+	
+}
