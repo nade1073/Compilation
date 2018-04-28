@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Token.h"
+#include "Parser.h"
 #include <string.h>
 int lineNumber=1;
 
@@ -60,6 +61,7 @@ REL_NUM (0.{DIGIT}+)|([1-9]{DIGIT}*.{DIGIT}+)
 "end_for"	{create_and_store_token(KEYWORD_END_FOR, lineNumber, yytext);return 1;}
 "free"		{create_and_store_token(KEYWORD_FREE, lineNumber, yytext);return 1;}
 "size_of"	{create_and_store_token(KEYWORD_SIZE_OF, lineNumber, yytext);return 1;}
+"malloc"	{create_and_store_token(KEYWORD_MALLOC, lineNumber, yytext);return 1;}
 {ID}		{create_and_store_token(ID, lineNumber, yytext);return 1;}
 ":"		{create_and_store_token(SEPERATION_SIGN_COLON, lineNumber, yytext);return 1;}
 ";"		{create_and_store_token(SEPERATION_SIGN_SEMICOLON, lineNumber, yytext);return 1;}
@@ -74,16 +76,16 @@ REL_NUM (0.{DIGIT}+)|([1-9]{DIGIT}*.{DIGIT}+)
 .		{fprintf(yyout,"The character '%s' at line: %d does not begin any legal token in the language.\n", yytext, lineNumber);}
 <<EOF>>		{create_and_store_token(END_OF_FILE, lineNumber, yytext);return 1;}
 %%
-void executeFile(char*, char*);
+void executeFile(char*, char*,char*);
 void main()
 {
-	executeFile("C:\\temp\\test1.txt", "C:\\temp\\test1_204233456_308548569_lex.txt");
+	executeFile("C:\\temp\\test1.txt", "C:\\temp\\test1_204233456_308548569_lex.txt","C:\\temp\\test1_204233456_308548569_syntactic.txt");
 	resetVarsAndList();
-	executeFile("C:\\temp\\test2.txt", "C:\\temp\\test2_204233456_308548569_lex.txt");
+	executeFile("C:\\temp\\test2.txt", "C:\\temp\\test2_204233456_308548569_lex.txt","C:\\temp\\test2_204233456_308548569_syntactic.txt");
 	resetVarsAndList();
 }
 
-void executeFile(char *inputFile, char *outputFile)
+void executeFile(char *inputFile, char *outputFile,char *parserOutput)
 {
 		lineNumber=1;
 		Token* currentToken=NULL;
@@ -98,20 +100,29 @@ void executeFile(char *inputFile, char *outputFile)
 		yyout = fopen(outputFile,"w");
 		if (!yyout)
 		{
-			printf("No output file was found \n");
+			printf("No output lex file was found \n");
 			return;
 		}
-		
+		printf("Trying to open Syntax output file '%s': \n",parserOutput);
+		yyoutSyntax = fopen(parserOutput,"w");
+		if (!yyoutSyntax)
+		{
+			printf("No output Syntax file was found \n");
+			return;
+		}
 				do
 				{
 				currentToken=next_token();
 				fprintf(yyout,"Token of kind '{%s}', was found at line: {%d}, lexeme: '{%s}'. \n", stringFromeTOKENS(currentToken->kind), currentToken->lineNumber, currentToken->lexeme);				
 				}while(currentToken->kind!= END_OF_FILE);
-		
+
+		backTokenAllNextTokenHappend();
+		parser_PROGRAM();
 		printf("File Execute finished\n");
 		printf("Closing input file \n");
 		fclose(yyin);
 		printf("Closing output file \n");
 		fclose(yyout);
-	
+		printf("Closing syntax output file \n");
+		fclose(yyoutSyntax);
 }

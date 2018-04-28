@@ -40,6 +40,7 @@ typedef enum eTOKENS
 	KEYWORD_END_FOR,
 	KEYWORD_FREE,
 	KEYWORD_SIZE_OF,
+	KEYWORD_MALLOC,
 	SEPERATION_SIGN_COLON,
 	SEPERATION_SIGN_SEMICOLON,
 	SEPERATION_SIGN_PARENT_OPEN,
@@ -70,4 +71,8 @@ Token *back_token();
 
 char* stringFromeTOKENS(enum eTOKENS f);
 void resetVarsAndList();
+
+
+
+void addTokenNode();
 #endif

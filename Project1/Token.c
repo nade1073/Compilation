@@ -3,7 +3,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+Node *headNode = NULL;
+int stepsCounter = 0;
+int maxSteps=0;
+
 int currentIndex = 0;
+int HowManyTimesNextTokenHappend = 0;
 Node* currentNode = NULL;
 int backCounter = 0; 
 #define TOKEN_ARRAY_SIZE 100
@@ -80,6 +86,7 @@ void create_and_store_token(eTOKENS kind, int numOfLine, char* lexeme)
 */
 Token *back_token()
 {
+	stepsCounter--;
 	backCounter++;
 	if (currentIndex == 0)
 	{
@@ -99,8 +106,10 @@ Token *back_token()
 * Else: continues to read the input file in order to identify, create and store a new token (using yylex function);
 *  returns the token that was created.
 */
+/*
 Token* next_token()
 {
+	HowManyTimesNextTokenHappend++;
 	if (backCounter > 0)
 	{
 		if (currentIndex == TOKEN_ARRAY_SIZE - 1)
@@ -120,7 +129,66 @@ Token* next_token()
 	}
 	return &(currentNode->tokensArray[currentIndex]);
 }
+*/
+Token *next_token()
+{
+	stepsCounter++;
 
+	if (stepsCounter > maxSteps)
+	{
+		maxSteps++;
+		yylex();
+		if (currentNode == NULL)
+		{
+			Node *currentNode = (Node*)calloc(1, sizeof(Node));
+		}
+		else if (currentIndex == TOKEN_ARRAY_SIZE)
+		{
+			addTokenNode();
+			currentIndex = 0;
+		}
+
+		return &currentNode->tokensArray[currentIndex++];
+	}
+	else
+	{
+		if (currentIndex == TOKEN_ARRAY_SIZE)
+		{
+			currentNode = currentNode->next;
+			currentIndex = 0;
+			return &currentNode->tokensArray[currentIndex];
+
+		}
+		return &currentNode->tokensArray[currentIndex++];
+	}
+}
+
+void addTokenNode()
+{
+	if (currentNode == NULL)
+	{
+		currentNode = (Node*)calloc(1, sizeof(Node));
+		headNode = currentNode;
+	}
+	else
+	{
+		Node *currentNodeTemp = currentNode;
+		Node *newNode = (Node*)calloc(1, sizeof(Node));
+		currentNode->next = newNode;
+		currentNode = currentNode->next;
+		currentNode->prev = currentNodeTemp;
+		currentIndex = 0;
+	}
+	currentNode->next = NULL;
+}
+void backTokenAllNextTokenHappend()
+{
+	int i;
+	for (i = 0; i < HowManyTimesNextTokenHappend; i++)
+	{
+		back_token();
+	}
+}
 char *stringFromeTOKENS(enum eTOKENS f)
 {
 	static const char *strings[] =
@@ -160,6 +228,7 @@ char *stringFromeTOKENS(enum eTOKENS f)
 		"KEYWORD_END_FOR",
 		"KEYWORD_FREE",
 		"KEYWORD_SIZE_OF",
+		"KEYWORD_MALLOC",
 		"SEPERATION_SIGN_COLON",
 		"SEPERATION_SIGN_SEMICOLON",
 		"SEPERATION_SIGN_PARENT_OPEN",
