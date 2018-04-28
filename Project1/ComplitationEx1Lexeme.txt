@@ -110,13 +110,13 @@ void executeFile(char *inputFile, char *outputFile,char *parserOutput)
 			printf("No output Syntax file was found \n");
 			return;
 		}
-				do
+
+/*				do
 				{
 				currentToken=next_token();
 				fprintf(yyout,"Token of kind '{%s}', was found at line: {%d}, lexeme: '{%s}'. \n", stringFromeTOKENS(currentToken->kind), currentToken->lineNumber, currentToken->lexeme);				
 				}while(currentToken->kind!= END_OF_FILE);
-
-		backTokenAllNextTokenHappend();
+*/
 		parser_PROGRAM();
 		printf("File Execute finished\n");
 		printf("Closing input file \n");

@@ -1971,8 +1971,8 @@ void executeFile(char *inputFile, char *outputFile,char *parserOutput)
 			printf("No output Syntax file was found \n");
 			return;
 		}
-/*
-				do
+
+/*				do
 				{
 				currentToken=next_token();
 				fprintf(yyout,"Token of kind '{%s}', was found at line: {%d}, lexeme: '{%s}'. \n", stringFromeTOKENS(currentToken->kind), currentToken->lineNumber, currentToken->lexeme);				

@@ -5,8 +5,8 @@
 
 
 Node *headNode = NULL;
-int stepsCounter = 0;
-int maxSteps=0;
+int nextTokenCount = 0;
+int maxNextToken=0;
 
 int currentIndex = 0;
 int HowManyTimesNextTokenHappend = 0;
@@ -86,7 +86,7 @@ void create_and_store_token(eTOKENS kind, int numOfLine, char* lexeme)
 */
 Token *back_token()
 {
-	stepsCounter--;
+	nextTokenCount--;
 	backCounter++;
 	if (currentIndex == 0)
 	{
@@ -106,37 +106,14 @@ Token *back_token()
 * Else: continues to read the input file in order to identify, create and store a new token (using yylex function);
 *  returns the token that was created.
 */
-/*
-Token* next_token()
-{
-	HowManyTimesNextTokenHappend++;
-	if (backCounter > 0)
-	{
-		if (currentIndex == TOKEN_ARRAY_SIZE - 1)
-		{
-			currentNode = currentNode->next;
-			currentIndex = 0;
-		}
-		else
-		{
-			currentIndex++;
-		}
-		backCounter--;
-	}
-	else
-	{	
-		yylex();
-	}
-	return &(currentNode->tokensArray[currentIndex]);
-}
-*/
+
 Token *next_token()
 {
-	stepsCounter++;
+	nextTokenCount++;
 
-	if (stepsCounter > maxSteps)
+	if (nextTokenCount > maxNextToken)
 	{
-		maxSteps++;
+		maxNextToken++;
 		yylex();
 		if (currentNode == NULL)
 		{
@@ -144,11 +121,11 @@ Token *next_token()
 		}
 		else if (currentIndex == TOKEN_ARRAY_SIZE)
 		{
-			addTokenNode();
+			addToken();
 			currentIndex = 0;
 		}
 
-		return &currentNode->tokensArray[currentIndex++];
+		return &(currentNode->tokensArray)[currentIndex++];
 	}
 	else
 	{
@@ -156,14 +133,14 @@ Token *next_token()
 		{
 			currentNode = currentNode->next;
 			currentIndex = 0;
-			return &currentNode->tokensArray[currentIndex];
+			return &(currentNode->tokensArray)[currentIndex];
 
 		}
-		return &currentNode->tokensArray[currentIndex++];
+		return &(currentNode->tokensArray)[currentIndex++];
 	}
 }
 
-void addTokenNode()
+void addToken()
 {
 	if (currentNode == NULL)
 	{

@@ -12,12 +12,25 @@ void match(eTOKENS actualKind)
 
 	if ((*currentToken).kind != actualKind)
 	{
-		fprintf(yyoutSyntax, "Expected token '%s' at line: %d, \n Actual token '%s', lexeme: '%s'.\n", (*currentToken).lineNumber, ((*currentToken).kind), (*currentToken).kind);
 		if ((*currentToken).kind == END_OF_FILE)
 		{
+			fprintf(yyoutSyntax, "Expected token '%s' at line: %d, Actual token '%s', lexeme: '%s'.\n",
+				stringFromeTOKENS(actualKind), (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
 			exit(0);
 		}
-
+		else
+		{
+			fprintf(yyoutSyntax, "Expected token '%s' at line: %d, Actual token '%s', lexeme: '%s'.\n",
+				stringFromeTOKENS(actualKind), (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+		}
+	}
+	else
+	{
+		if (actualKind == END_OF_FILE)
+		{
+			fprintf(yyoutSyntax, "EOF\n");
+			return;
+		}
 	}
 }
 
@@ -76,34 +89,30 @@ int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr,int followAr
 void HandlingErrors(Token* currentToken, eTOKENS *followArr,int followArrSize, eTOKENS *expectedTokens,int expectedTokensSize)
 {
 	int i;
-	char errorMessage[250] = "";
+	char expectedTokensString[250] = "";
 	int TokenFound;
 	TokenFound = CheckIfTokenInFollowArr(currentToken, followArr, followArrSize);
-	if (expectedTokensSize == 1)
+	for (i = 0; i < expectedTokensSize; i++)
 	{
-		strcat(errorMessage, "Expected Token '");
-		strcat(errorMessage, stringFromeTOKENS(expectedTokens[0]));
-		strcat(errorMessage, "' at line: %d, \n");
-		strcat(errorMessage, "Actual token '%s', lexeme: '%s'.\n");
-	}
-	else
-	{
-		strcat(errorMessage, "Expected one of tokens ");
-		for (i = 0; i < expectedTokensSize; i++)
-		{
-			strcat(errorMessage, "'");
-			strcat(errorMessage, stringFromeTOKENS(expectedTokens[i]));
-			strcat(errorMessage, "', ");
-		}
-		strcat(errorMessage, " at line: %d, \n");
-		strcat(errorMessage, "Actual token '%s', lexeme: '%s'.\n");
+		strcat(expectedTokensString, "'");
+		strcat(expectedTokensString, stringFromeTOKENS(expectedTokens[i]));
+		strcat(expectedTokensString, "' ");
 	}
 		
 	
 	while (TokenFound == 0 && (*currentToken).kind != END_OF_FILE)
 	{
 
-		fprintf(yyoutSyntax, errorMessage, (*currentToken).lineNumber, (*currentToken).kind, (*currentToken).lexeme);
+		if (expectedTokensSize == 1)
+		{
+			fprintf(yyoutSyntax, "Expected token %s at line: %d,\nActual token '%s', lexeme: '%s'.\n",
+				expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+		}
+		else
+		{
+			fprintf(yyoutSyntax, "Expected one of tokens %s at line: %d,\nActual token '%s', lexeme: '%s'.\n",
+				expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+		}
 		currentToken = next_token();
 		TokenFound = CheckIfTokenInFollowArr(currentToken, followArr, followArrSize);
 
@@ -329,10 +338,11 @@ void parser_POINTER_TYPE_TAG()
 		 if ((*currentToken).kind == ASSIGNMENT)
 		 {
 			 
-			 fprintf(yyoutSyntax, "{COMMAND -> id=malloc(sizeof(type_name))}\n");
+			
 			 currentToken = next_token();
 			 if ((*currentToken).kind == KEYWORD_MALLOC)
 			 {
+				 fprintf(yyoutSyntax, "{COMMAND -> id=malloc(sizeof(type_name))}\n");
 				 match(SEPERATION_SIGN_PARENT_OPEN);
 				 match(KEYWORD_SIZE_OF);
 				 match(SEPERATION_SIGN_PARENT_OPEN);
@@ -378,7 +388,7 @@ void parser_POINTER_TYPE_TAG()
 				 fprintf(yyoutSyntax, "{COMMAND -> for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for}");
 				 match(SEPERATION_SIGN_PARENT_OPEN);
 				 match(ID);
-				 match(REL_OP_EQUAL);
+				 match(ASSIGNMENT);
 				 parser_EXPRESSION();
 				 match(SEPERATION_SIGN_SEMICOLON);
 				 match(ID);
@@ -389,13 +399,12 @@ void parser_POINTER_TYPE_TAG()
 				 match(SEPERATION_SIGN_PARENT_CLOSE);
 				 parser_COMMANDS();
 				 match(SEPERATION_SIGN_SEMICOLON);
-				 match(KEYWORD_FOR);
+				 match(KEYWORD_END_FOR);
 			 }
 		     else
 				if ((*currentToken).kind == KEYWORD_FREE)
 					 {
 						fprintf(yyoutSyntax, "{COMMAND -> free(id)}");
-						match(KEYWORD_FREE);
 						match(SEPERATION_SIGN_PARENT_OPEN);
 						match(ID);
 						match(SEPERATION_SIGN_PARENT_CLOSE);

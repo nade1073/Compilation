@@ -74,5 +74,5 @@ void resetVarsAndList();
 
 
 
-void addTokenNode();
+void addToken();
 #endif
