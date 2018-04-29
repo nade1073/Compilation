@@ -12,17 +12,13 @@ void match(eTOKENS actualKind)
 
 	if ((*currentToken).kind != actualKind)
 	{
+		
+		fprintf(yyoutSyntax, "Expected token '%s' at line: %d, Actual token '%s', lexeme: '%s'.\n",stringFromeTOKENS(actualKind), (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
 		if ((*currentToken).kind == END_OF_FILE)
 		{
-			fprintf(yyoutSyntax, "Expected token '%s' at line: %d, Actual token '%s', lexeme: '%s'.\n",
-				stringFromeTOKENS(actualKind), (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
 			exit(0);
 		}
-		else
-		{
-			fprintf(yyoutSyntax, "Expected token '%s' at line: %d, Actual token '%s', lexeme: '%s'.\n",
-				stringFromeTOKENS(actualKind), (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
-		}
+		
 	}
 	else
 	{
@@ -123,6 +119,7 @@ void parser_PROGRAM()
 {
 	fprintf(yyoutSyntax, "{PROGRAM -> BLOCK}\n");
 	parser_BLOCK();
+	match(END_OF_FILE);
 }
 void parser_BLOCK()
 {
@@ -180,6 +177,7 @@ void parser_DEFINITIONS_TAG()
 		if ((*currentToken).kind == KEYWORD_BEGIN)
 		{
 			fprintf(yyoutSyntax, "{DEFINITION_TAG -> Epsilon}\n");
+			back_token();
 			back_token();
 			
 		}
@@ -307,12 +305,13 @@ void parser_POINTER_TYPE_TAG()
 	 if ((*currentToken).kind == SEPERATION_SIGN_SEMICOLON)
 	 {
 		 Token *currentToken = next_token();
-		 if ((*currentToken).kind == KEYWORD_END)
+		 if ((*currentToken).kind == KEYWORD_END || ((*currentToken).kind == KEYWORD_END_FOR) || ((*currentToken).kind == KEYWORD_END_WHEN) || ((*currentToken).kind == KEYWORD_DEFAULT))
 		 {
 			 fprintf(yyoutSyntax, "{COMMAND_TAG -> Epsilon}\n");
 			 back_token(); 
+			 back_token();
 		 }
-		 else
+		else
 		 {
 			 fprintf(yyoutSyntax, "{COMMANDS_TAG -> COMMAND COMMANDS_TAG}\n");
 			 back_token();
@@ -330,15 +329,14 @@ void parser_POINTER_TYPE_TAG()
  {
 	 eTOKENS followARR[1] = { SEPERATION_SIGN_SEMICOLON };
 	 eTOKENS *expectedTokens[5] = { ID,KEYWORD_WHEN, KEYWORD_FOR,KEYWORD_FREE,KEYWORD_BLOCK};
+	 eTOKENS InsideexpectedTokens[6] = { REL_OP_LESS , REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER , REL_OP_EQUAL_OR_GREATER };
 	 Token *currentToken = next_token();
 	 if ((*currentToken).kind == ID)
 	 {
 		 currentToken = next_token();
 		
 		 if ((*currentToken).kind == ASSIGNMENT)
-		 {
-			 
-			
+		 {	
 			 currentToken = next_token();
 			 if ((*currentToken).kind == KEYWORD_MALLOC)
 			 {
@@ -351,14 +349,25 @@ void parser_POINTER_TYPE_TAG()
 				 match(SEPERATION_SIGN_PARENT_CLOSE);
 			 }
 			 else
-			 {
-				 fprintf(yyoutSyntax, "{COMMAND -> ID = EXPRESSION}\n");
-				 parser_EXPRESSION();
-			 }
+				 {
+					 fprintf(yyoutSyntax, "{COMMAND -> ID = EXPRESSION}\n");
+					// currentToken = next_token();
+						 if (((*currentToken).kind == REL_NUM)|| ((*currentToken).kind == ID)|| ((*currentToken).kind == INT_NUM)|| ((*currentToken).kind == UNARY_OP_AMP)|| ((*currentToken).kind == KEYWORD_SIZE_OF))
+						 {
+							 back_token();
+							 parser_EXPRESSION();
+				
+						 }
+						else
+						 {
+							 HandlingErrors(currentToken, followARR, 1, InsideexpectedTokens, 6);
+						 }
+				 }
 		 }
 		 else
 		 {
 			 fprintf(yyoutSyntax, "{COMMAND -> RECEIVER = EXPRESSION}\n");
+			 back_token();
 			 parser_RECIVER_TAG();
 			 match(ASSIGNMENT);
 			 parser_EXPRESSION();
@@ -372,7 +381,41 @@ void parser_POINTER_TYPE_TAG()
 			 match(SEPERATION_SIGN_PARENT_OPEN);
 			 parser_EXPRESSION();
 			 currentToken = next_token();
-			 REL_OP_CASES(currentToken);
+			 if ((*currentToken).kind == REL_OP_LESS)
+			 {
+				 parser_EXPRESSION();
+			 }
+			 else
+				 if ((*currentToken).kind == REL_OP_EQUAL_OR_LESS)
+				 {
+					 parser_EXPRESSION();
+				 }
+				 else
+					 if ((*currentToken).kind == REL_OP_EQUAL)
+					 {
+						 parser_EXPRESSION();
+					 }
+					 else
+						 if ((*currentToken).kind == REL_OP_NOT_EQUAL)
+						 {
+							 parser_EXPRESSION();
+						 }
+						 else
+							 if ((*currentToken).kind == REL_OP_GREATER)
+							 {
+								 parser_EXPRESSION();
+							 }
+							 else
+								 if ((*currentToken).kind == REL_OP_EQUAL_OR_GREATER)
+								 {
+									 parser_EXPRESSION();
+								 }
+								 else
+								 {
+									 eTOKENS followARRRelOP[9] = { SEPERATION_SIGN_SEMICOLON, REL_OP_LESS ,REL_OP_EQUAL_OR_LESS ,REL_OP_EQUAL ,REL_OP_NOT_EQUAL ,REL_OP_GREATER ,REL_OP_EQUAL_OR_GREATER ,SEPERATION_SIGN_PARENT_CLOSE ,SEPERATION_SIGN_BRACKET_CLOSE };
+									 eTOKENS expectedTokensRelOp[6] = { REL_OP_LESS, REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER, REL_OP_EQUAL_OR_GREATER };
+									 HandlingErrors(currentToken, followARRRelOP, 9, expectedTokensRelOp, 6);
+								 }
 			 match(SEPERATION_SIGN_PARENT_CLOSE);
 			 match(KEYWORD_DO);
 			 parser_COMMANDS();
@@ -392,7 +435,40 @@ void parser_POINTER_TYPE_TAG()
 				 parser_EXPRESSION();
 				 match(SEPERATION_SIGN_SEMICOLON);
 				 match(ID);
-				 REL_OP_CASES(currentToken);
+				 currentToken = next_token();
+				 if ((*currentToken).kind == REL_OP_LESS)
+				 {
+					 parser_EXPRESSION();
+				 }
+				 else
+					 if ((*currentToken).kind == REL_OP_EQUAL_OR_LESS)
+					 {
+						 parser_EXPRESSION();
+					 }
+					 else
+						 if ((*currentToken).kind == REL_OP_EQUAL)
+						 {
+							 parser_EXPRESSION();
+						 }
+						 else
+							 if ((*currentToken).kind == REL_OP_NOT_EQUAL)
+							 {
+								 parser_EXPRESSION();
+							 }
+							 else
+								 if ((*currentToken).kind == REL_OP_GREATER)
+								 {
+									 parser_EXPRESSION();
+								 }
+								 else
+									 if ((*currentToken).kind == REL_OP_EQUAL_OR_GREATER)
+									 {
+										 parser_EXPRESSION();
+									 }
+									 else
+									 {
+										 HandlingErrors(currentToken, followARR, 1, InsideexpectedTokens, 6);
+									 }
 				 match(SEPERATION_SIGN_SEMICOLON);
 				 match(ID);
 				 match(UNARY_OP_INCREMENT);
@@ -413,6 +489,7 @@ void parser_POINTER_TYPE_TAG()
 						 if ((*currentToken).kind == KEYWORD_BLOCK)
 						 {
 							 fprintf(yyoutSyntax, "{COMMAND -> BLOCK}\n");
+							 back_token();
 							 parser_BLOCK();
 						 }
 						 else

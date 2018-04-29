@@ -107,6 +107,39 @@ Token *back_token()
 *  returns the token that was created.
 */
 
+
+Token* next_token()
+{
+	nextTokenCount++;
+	if (backCounter > 0)
+	{
+		if (currentIndex == TOKEN_ARRAY_SIZE - 1)
+		{
+			currentNode = currentNode->next;
+			currentIndex = 0;
+		}
+		else
+		{
+			currentIndex++;
+		}
+	backCounter--;
+	}
+	else
+	{
+		yylex();
+	}
+return &(currentNode->tokensArray[currentIndex]);
+}
+
+
+
+
+
+
+
+
+
+/*
 Token *next_token()
 {
 	nextTokenCount++;
@@ -158,6 +191,7 @@ void addToken()
 	}
 	currentNode->next = NULL;
 }
+*/
 void backTokenAllNextTokenHappend()
 {
 	int i;
