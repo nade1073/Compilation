@@ -307,7 +307,6 @@ void parser_TYPE_INDICATOR()
 	}
 }
 
-
 void parser_POINTER_TYPE_TAG()
 {
 	eTOKENS followARR[] = { SEPERATION_SIGN_SEMICOLON };

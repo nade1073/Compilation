@@ -37,7 +37,7 @@
     <Text Include="information.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="ComplitationEx1Lexeme.txt">
+    <Text Include="ComplitationEx2Lexeme.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
