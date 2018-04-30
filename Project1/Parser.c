@@ -458,26 +458,32 @@ void parser_COMMAND()
 			case REL_OP_LESS:
 			{
 				parser_EXPRESSION();
+				break;
 			}
 			case REL_OP_EQUAL_OR_LESS:
 			{
 				parser_EXPRESSION();
+				break;
 			}
 			case REL_OP_EQUAL:
 			{
 				parser_EXPRESSION();
+				break;
 			}
 			case REL_OP_NOT_EQUAL:
 			{
 				parser_EXPRESSION();
+				break;
 			}
 			case REL_OP_GREATER:
 			{
 				parser_EXPRESSION();
+				break;
 			}
 			case REL_OP_EQUAL_OR_GREATER:
 			{
 				parser_EXPRESSION();
+				break;
 			}
 			default:
 			{
