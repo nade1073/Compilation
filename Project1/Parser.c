@@ -503,7 +503,7 @@ void parser_COMMAND()
 		}
 		case KEYWORD_FOR:
 		{
-			fprintf(yyoutSyntax, "{COMMAND -> for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for}");
+			fprintf(yyoutSyntax, "{COMMAND -> for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for}\n");
 			match(SEPERATION_SIGN_PARENT_OPEN);
 			match(ID);
 			match(ASSIGNMENT);
@@ -559,7 +559,7 @@ void parser_COMMAND()
 		}
 		case KEYWORD_FREE:
 		{
-			fprintf(yyoutSyntax, "{COMMAND -> free(id)}");
+			fprintf(yyoutSyntax, "{COMMAND -> free(id)}\n");
 			match(SEPERATION_SIGN_PARENT_OPEN);
 			match(ID);
 			match(SEPERATION_SIGN_PARENT_CLOSE);
