@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "Token.h"
 extern FILE *yyoutSyntax;
-void match(eTOKENS);
+int match(eTOKENS);
 void REL_OP_CASES(Token *currentToken);
 int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr, int followArrsize);
 void parser_PROGRAM();
