@@ -1954,7 +1954,6 @@ void main()
 void executeFileOfPhaseTwo(char *inputFile, char *outputFile)
 {
 		lineNumber=1;
-		Token* currentToken=NULL;
 		printf("Trying to open input file '%s': \n",inputFile);
 		yyin = fopen(inputFile,"r");
 		if (!yyin)
@@ -1977,10 +1976,6 @@ void executeFileOfPhaseTwo(char *inputFile, char *outputFile)
 		fclose(yyoutSyntax);
 		
 }
-
-
-
-
 void executeFileOfPhaseOne(char *inputFile, char *outputFile)
 {
 		lineNumber=1;
