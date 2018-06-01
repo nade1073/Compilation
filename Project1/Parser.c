@@ -45,13 +45,13 @@ void parser_BLOCK()
 
 	if (match(SEPERATION_SIGN_SEMICOLON)==0)
 	{
-		HandleMatchError(folowArray, folowArraySize);
+		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
 
 	if (match(KEYWORD_END)==0)
 	{
-		HandleMatchError(folowArray, folowArraySize);
+		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
 }
@@ -122,7 +122,7 @@ void parser_DEFINITIONS_TAG()
 		return;
 	}
 	currentToken = next_token();
-	switch ((*currentToken).kind == KEYWORD_BEGIN)
+	switch ((*currentToken).kind)
 	{
 		case KEYWORD_BEGIN:
 		{
@@ -591,6 +591,7 @@ void parser_COMMANDS_TAG()
 		{
 			back_token();
 			parser_COMMAND();
+			parser_COMMANDS_TAG();
 			break;
 		}
 		default:
@@ -617,6 +618,7 @@ int match(eTOKENS i_ActualKind)
 		}
 
 		boolToReturn = 0;
+		return boolToReturn;
 	}
 	else if (i_ActualKind == END_OF_FILE)
 	{
@@ -692,7 +694,7 @@ int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr, int followA
 	return TokenFound;
 }
 
-void HandleMatchError(eTOKENS i_FollowArray, int i_SizeOfFollowArray)
+void HandleMatchError(eTOKENS *i_FollowArray, int i_SizeOfFollowArray)
 {
 	int tokenFound = 0;
 	while (tokenFound == 0 && (*currentToken).kind != END_OF_FILE)
@@ -733,6 +735,7 @@ void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, 
 				expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
 		}
 		currentToken = next_token();
+		tokenFound = CheckIfTokenInFollowArr(currentToken, followArr, followArrSize);
 	}
 	currentToken = back_token();
 }
