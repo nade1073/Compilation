@@ -3,11 +3,13 @@
 
 #include <stdio.h>
 #include "Token.h"
+#include "DataStruct.h"
 typedef struct DataItem;
+struct DataItem* createHashTable();
 int hashCode(int key);
-DataItem *search(int key);
-void insert(int key, int data);
-DataItem* deleteItem(DataItem* item);
+struct DataItem *search(int key);
+void insert(int key, Data* data);
+struct DataItem* deleteItem(struct DataItem* item);
 void display();
+#endif 
 
-#endif

@@ -20,7 +20,6 @@ void parser_COMMANDS_TAG();
 void parser_COMMAND();
 void parser_EXPRESSION();
 void parser_EXPRESSION_TAG();
-void parser_RECIVER();
 void parser_RECIVER_TAG();
 void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, eTOKENS *expectedTokens, int expectedTokensSize);
 void HandleMatchError(eTOKENS *i_FollowArray, int i_SizeOfFollowArray);

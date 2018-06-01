@@ -9,12 +9,9 @@ Token *currentToken;
 
 void parser_PROGRAM()
 {
-
-
 	fprintf(yyoutSyntax, "{PROGRAM -> BLOCK}\n");
 	parser_BLOCK();
 	match(END_OF_FILE);
-
 }
 
 void parser_BLOCK()
@@ -23,33 +20,33 @@ void parser_BLOCK()
 	int folowArraySize = 2;
 
 	fprintf(yyoutSyntax, "{BLOCK -> block DEFINITIONS; begin COMMANDS; end}\n");
-	if (match(KEYWORD_BLOCK)==0)
+	if (match(KEYWORD_BLOCK) == 0)
 	{
 		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
 
 	parser_DEFINITIONS();
-	if (match(SEPERATION_SIGN_SEMICOLON)==0)
+	if (match(SEPERATION_SIGN_SEMICOLON) == 0)
 	{
 		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
 
-	if (match(KEYWORD_BEGIN)==0)
+	if (match(KEYWORD_BEGIN) == 0)
 	{
 		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
 	parser_COMMANDS();
 
-	if (match(SEPERATION_SIGN_SEMICOLON)==0)
+	if (match(SEPERATION_SIGN_SEMICOLON) == 0)
 	{
 		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
 
-	if (match(KEYWORD_END)==0)
+	if (match(KEYWORD_END) == 0)
 	{
 		HandleMatchError(followArray, folowArraySize);
 		return;
@@ -68,44 +65,44 @@ void parser_DEFINITION()
 	eTOKENS followArray[] = { SEPERATION_SIGN_SEMICOLON };
 	int folowArraySize = 1;
 	eTOKENS expectedTokens[] = { ID , KEYWORD_TYPE };
-	int expectedTokensArraySize=2;
+	int expectedTokensArraySize = 2;
 	currentToken = next_token();
 	fprintf(yyoutSyntax, "{DEFINITION -> VAR_DEFINITION | TYPE_DEFINITION}\n");
 
 	switch ((*currentToken).kind)
 	{
-		case ID:
+	case ID:
+	{
+		fprintf(yyoutSyntax, "{VAR_DEFINITION -> id: VAR_DEFINITION_TAG}\n");
+		if (match(SEPERATION_SIGN_COLON) == 0)
 		{
-			fprintf(yyoutSyntax, "{VAR_DEFINITION -> id: VAR_DEFINITION_TAG}\n");
-			if (match(SEPERATION_SIGN_COLON)==0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
+			HandleMatchError(followArray, folowArraySize);
+			break;
+		}
 
-			parser_VAR_DEFINITION_TAG();
+		parser_VAR_DEFINITION_TAG();
+		break;
+	}
+	case KEYWORD_TYPE:
+	{
+		fprintf(yyoutSyntax, "{TYPE_DEFINITION -> type type_name is TYPE_INDICATOR}\n");
+		if (match(ID) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
 			break;
 		}
-		case KEYWORD_TYPE:
+		if (match(KEYWORD_IS) == 0)
 		{
-			fprintf(yyoutSyntax, "{TYPE_DEFINITION -> type type_name is TYPE_INDICATOR}\n");
-			if (match(ID)==0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			if (match(KEYWORD_IS)==0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			parser_TYPE_INDICATOR();
+			HandleMatchError(followArray, folowArraySize);
 			break;
 		}
-		default:
-		{
-			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, expectedTokensArraySize);
-		}
+		parser_TYPE_INDICATOR();
+		break;
+	}
+	default:
+	{
+		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, expectedTokensArraySize);
+	}
 	}
 }
 
@@ -124,25 +121,26 @@ void parser_DEFINITIONS_TAG()
 	currentToken = next_token();
 	switch ((*currentToken).kind)
 	{
-		case KEYWORD_BEGIN:
-		{
-				fprintf(yyoutSyntax, "{DEFINITIONS_TAG -> EPSILON}\n");
-				currentToken = back_token();
-				currentToken = back_token();
-				break;
-		}
-		case ID:
-		case KEYWORD_TYPE:
-		{
-			parser_DEFINITIONS();
-			break;
-		}
-		default:
-		{
+	case KEYWORD_BEGIN:
+	{
+		fprintf(yyoutSyntax, "{DEFINITIONS_TAG -> EPSILON}\n");
+		currentToken = back_token();
+		currentToken = back_token();
+		break;
+	}
+	case ID:
+	case KEYWORD_TYPE:
+	{
+		currentToken = back_token();
+		parser_DEFINITIONS();
+		break;
+	}
+	default:
+	{
 		eTOKENS expectedTokens[] = { KEYWORD_BEGIN,ID,KEYWORD_TYPE };
 		int expectedTokensArraySize = 3;
 		HandlingErrors(currentToken, followArray, followArraySize, expectedTokens, expectedTokensArraySize);
-		}
+	}
 	}
 }
 
@@ -156,25 +154,25 @@ void parser_VAR_DEFINITION_TAG()
 	fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC TYPE | type_name}\n");
 	switch ((*currentToken).kind)
 	{
-		case KEYWORD_INTEGER:
-		{
-			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> INTEGER}\n");
-			break;
-		}
-		case KEYWORD_REAL:
-		{
-			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> REAL}\n");
-			break;
-		}
-		case ID:
-		{
-			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> type_name}\n");
-			break;
-		}
-		default:
-		{
-			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokensArray);
-		}
+	case KEYWORD_INTEGER:
+	{
+		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> INTEGER}\n");
+		break;
+	}
+	case KEYWORD_REAL:
+	{
+		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> REAL}\n");
+		break;
+	}
+	case ID:
+	{
+		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> type_name}\n");
+		break;
+	}
+	default:
+	{
+		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokensArray);
+	}
 	}
 }
 
@@ -189,74 +187,73 @@ void parser_TYPE_INDICATOR()
 
 	switch ((*currentToken).kind)
 	{
+	case KEYWORD_INTEGER:
+	{
+		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> BASIC_TYPE -> INTEGER}\n");
+		break;
+	}
+
+	case KEYWORD_REAL:
+	{
+		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> BASIC_TYPE -> REAL}\n");
+		break;
+	}
+	case KEYWORD_ARRAY:
+	{
+		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE}\n");
+		if (match(SEPERATION_SIGN_BRACKET_OPEN) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			break;
+		}
+		if (match(INT_NUM) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			break;
+		}
+		if (match(SEPERATION_SIGN_BRACKET_CLOSE) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			break;
+		}
+		if (match(KEYWORD_OF) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			break;
+		}
+
+		currentToken = next_token();
+		switch ((*currentToken).kind)
+		{
 		case KEYWORD_INTEGER:
 		{
-			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> BASIC_TYPE -> INTEGER}\n");
+			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE -> array [INT_NUM] of INTEGER }\n");
 			break;
 		}
-
 		case KEYWORD_REAL:
 		{
-			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> BASIC_TYPE -> REAL}\n");
-			break;
-		}
-		case KEYWORD_ARRAY:
-		{
-			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE}\n");
-			if (match(SEPERATION_SIGN_BRACKET_OPEN)==0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			if (match(INT_NUM)==0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			if (match(SEPERATION_SIGN_BRACKET_CLOSE)==0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			if (match(KEYWORD_OF)==0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-
-			currentToken = next_token();
-
-			switch ((*currentToken).kind)
-			{
-				case KEYWORD_INTEGER:
-				{
-					fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE -> array [INT_NUM] of INTEGER }\n");
-					break;
-				}
-				case KEYWORD_REAL:
-				{
-					fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE -> array [INT_NUM] of REAL }\n");
-					break;
-				}
-				default:
-				{
-					eTOKENS expectedTokensInside[] = { KEYWORD_INTEGER , KEYWORD_REAL };
-					int sizeOfExpectedTokensInside = 2;
-					HandlingErrors(currentToken, followArray, folowArraySize, expectedTokensInside, sizeOfExpectedTokensInside);
-				}
-			}
-			break;
-		}
-		case POINTER:
-		{
-			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> POINTER_TYPE -> ^POINTER_TYPE_TAG}\n");
-			parser_POINTER_TYPE_TAG();
+			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE -> array [INT_NUM] of REAL }\n");
 			break;
 		}
 		default:
 		{
-			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
+			eTOKENS expectedTokensInside[] = { KEYWORD_INTEGER , KEYWORD_REAL };
+			int sizeOfExpectedTokensInside = 2;
+			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokensInside, sizeOfExpectedTokensInside);
 		}
+		}
+		break;
+	}
+	case POINTER:
+	{
+		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> POINTER_TYPE -> ^POINTER_TYPE_TAG}\n");
+		parser_POINTER_TYPE_TAG();
+		break;
+	}
+	default:
+	{
+		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
+	}
 	}
 }
 
@@ -303,260 +300,281 @@ void parser_COMMAND()
 {
 	eTOKENS followArray[] = { SEPERATION_SIGN_SEMICOLON };
 	int folowArraySize = 1;
-
-
 	fprintf(yyoutSyntax, "{COMMAND -> RECEIVER = EXPRESSION | when (EXPRESSION rel_op EXPRESSION) do COMMANDS; default COMMANDS; end_when | for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for | id = malloc(size_of(type_name)) | free(id) | BLOCK}\n");
 	currentToken = next_token();
 
 	switch ((*currentToken).kind)
 	{
-		case ID:
-		{
-			fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION | id = malloc(size_of(type_name))}\n");
-			if (match(ASSIGNMENT) == 0)
+	case ID:
+	{
+		fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION | id = malloc(size_of(type_name))}\n");
+		currentToken = next_token();
+		switch ((*currentToken).kind)
 			{
-				HandleMatchError(followArray, folowArraySize);
-				return;
-			}
-			currentToken = next_token();
-			switch ((*currentToken).kind)
+			case ASSIGNMENT:
 			{
-				case KEYWORD_MALLOC:
-				{
-					fprintf(yyoutSyntax, "{COMMAND -> id=malloc(sizeof(type_name))}\n");
-					if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
-					{
-						HandleMatchError(followArray, folowArraySize);
-						return;
-					}
-					if (match(KEYWORD_SIZE_OF) == 0)
-					{
-						HandleMatchError(followArray, folowArraySize);
-						return;
-					}
-					if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
-					{
-						HandleMatchError(followArray, folowArraySize);
-						return;
-					}
-					if (match(ID) == 0)
-					{
-						HandleMatchError(followArray, folowArraySize);
-						return;
-					}
-					if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
-					{
-						HandleMatchError(followArray, folowArraySize);
-						return;
-					}
-					if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
-					{
-						HandleMatchError(followArray, folowArraySize);
-						return;
-					}
-					break;
-				}
-				case REL_NUM:
-				case ID:
-				case INT_NUM:
-				case UNARY_OP_AMP:
-				case KEYWORD_SIZE_OF:
-				{
-					fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION}\n");
-					currentToken = back_token();
-					parser_EXPRESSION();
-					break;
-				}
-				default:
-				{
-					eTOKENS *expectedTokens[] = { KEYWORD_MALLOC,REL_NUM,ID,INT_NUM,UNARY_OP_AMP,KEYWORD_SIZE_OF };
-					int sizeOfExpectedTokens = 6;
-					HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
-					break;
-				}
-			}
-			break;
-		}
-		case KEYWORD_WHEN:
-		{
-				eTOKENS followARRRelOP[9] = { SEPERATION_SIGN_SEMICOLON, REL_OP_LESS ,REL_OP_EQUAL_OR_LESS ,REL_OP_EQUAL ,REL_OP_NOT_EQUAL ,REL_OP_GREATER ,REL_OP_EQUAL_OR_GREATER ,SEPERATION_SIGN_PARENT_CLOSE ,SEPERATION_SIGN_BRACKET_CLOSE };
-				eTOKENS expectedTokensRelOp[6] = { REL_OP_LESS, REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER, REL_OP_EQUAL_OR_GREATER };
-				fprintf(yyoutSyntax, "{COMMAND -> when (EXPRESSION rel_op EXPRESSION) do COMMANDS; default COMMANDS; end_when}\n");
-				if (match(SEPERATION_SIGN_PARENT_OPEN)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				parser_EXPRESSION();
 				currentToken = next_token();
 				switch ((*currentToken).kind)
 				{
-					case REL_OP_LESS:
-					case REL_OP_EQUAL_OR_LESS:
-					case REL_OP_EQUAL:
-					case REL_OP_NOT_EQUAL:
-					case REL_OP_GREATER:
-					case REL_OP_EQUAL_OR_GREATER:
+					case KEYWORD_MALLOC:
 					{
+						fprintf(yyoutSyntax, "{COMMAND -> id=malloc(sizeof(type_name))}\n");
+						if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
+						{
+							HandleMatchError(followArray, folowArraySize);
+							return;
+						}
+						if (match(KEYWORD_SIZE_OF) == 0)
+						{
+							HandleMatchError(followArray, folowArraySize);
+							return;
+						}
+						if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
+						{
+							HandleMatchError(followArray, folowArraySize);
+							return;
+						}
+						if (match(ID) == 0)
+						{
+							HandleMatchError(followArray, folowArraySize);
+							return;
+						}
+						if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
+						{
+							HandleMatchError(followArray, folowArraySize);
+							return;
+						}
+						if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
+						{
+							HandleMatchError(followArray, folowArraySize);
+							return;
+						}
+						break;
+					}
+					case REL_NUM:
+					case ID:
+					case INT_NUM:
+					case UNARY_OP_AMP:
+					case KEYWORD_SIZE_OF:
+					{
+						fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION}\n");
+						currentToken = back_token();
 						parser_EXPRESSION();
 						break;
 					}
 					default:
 					{
-						eTOKENS expectedTokens[] = { REL_OP_LESS , REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER , REL_OP_EQUAL_OR_GREATER };
+						eTOKENS expectedTokens[] = { KEYWORD_MALLOC,REL_NUM,ID,INT_NUM,UNARY_OP_AMP,KEYWORD_SIZE_OF };
 						int sizeOfExpectedTokens = 6;
 						HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
-					}
-				}
-				if (match(SEPERATION_SIGN_PARENT_CLOSE)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(KEYWORD_DO)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				parser_COMMANDS();
-				if (match(SEPERATION_SIGN_SEMICOLON)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(KEYWORD_DEFAULT)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				parser_COMMANDS();
-				if (match(SEPERATION_SIGN_SEMICOLON)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(KEYWORD_END_WHEN)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-			break;
-			}
-		case KEYWORD_FOR:
-		{
-				fprintf(yyoutSyntax, "{COMMAND -> for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for}\n");
-				if (match(SEPERATION_SIGN_PARENT_OPEN)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(ID)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(ASSIGNMENT)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				parser_EXPRESSION();
-				if (match(SEPERATION_SIGN_SEMICOLON)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(ID)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				currentToken = next_token();
-				switch ((*currentToken).kind)
-				{
-					case REL_OP_LESS:
-					case REL_OP_EQUAL_OR_LESS:
-					case REL_OP_EQUAL:
-					case REL_OP_NOT_EQUAL:
-					case REL_OP_GREATER:
-					case REL_OP_EQUAL_OR_GREATER:
-					{
-						parser_EXPRESSION();
 						break;
 					}
-					default:
-					{
-						eTOKENS expectedTokens[] = { REL_OP_LESS , REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER , REL_OP_EQUAL_OR_GREATER };
-						int sizeOfExpectedTokens = 6;
-						HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
-					}
-				}
-				if (match(SEPERATION_SIGN_SEMICOLON)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(ID)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(UNARY_OP_INCREMENT)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(SEPERATION_SIGN_PARENT_CLOSE)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				parser_COMMANDS();
-				if (match(SEPERATION_SIGN_SEMICOLON)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(KEYWORD_END_FOR)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-			break;
-		}
-		case KEYWORD_FREE:
-		{
-				fprintf(yyoutSyntax, "{COMMAND -> free(id)}\n");
-				if (match(SEPERATION_SIGN_PARENT_OPEN)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(ID)==0)
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
-				}
-				if (match(SEPERATION_SIGN_PARENT_CLOSE))
-				{
-					HandleMatchError(followArray, folowArraySize);
-					return;
 				}
 				break;
 			}
-		case KEYWORD_BLOCK:
+			case POINTER:
+			case SEPERATION_SIGN_BRACKET_OPEN:
+			{
+				currentToken = back_token();
+				parser_RECIVER_TAG();
+				if (match(ASSIGNMENT) == 0)
+				{
+					HandleMatchError(followArray, folowArraySize);
+					return;
+				}
+				parser_EXPRESSION();
+				break;
+			}
+			default:
+			{
+				eTOKENS expectedTokens[] = { ASSIGNMENT,POINTER,SEPERATION_SIGN_BRACKET_OPEN };
+				int sizeOfExpectedTokens = 3;
+				HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
+				break;
+			}
+		}
+		break;
+	}
+	case KEYWORD_WHEN:
+	{
+		eTOKENS followARRRelOP[9] = { SEPERATION_SIGN_SEMICOLON, REL_OP_LESS ,REL_OP_EQUAL_OR_LESS ,REL_OP_EQUAL ,REL_OP_NOT_EQUAL ,REL_OP_GREATER ,REL_OP_EQUAL_OR_GREATER ,SEPERATION_SIGN_PARENT_CLOSE ,SEPERATION_SIGN_BRACKET_CLOSE };
+		eTOKENS expectedTokensRelOp[6] = { REL_OP_LESS, REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER, REL_OP_EQUAL_OR_GREATER };
+		fprintf(yyoutSyntax, "{COMMAND -> when (EXPRESSION rel_op EXPRESSION) do COMMANDS; default COMMANDS; end_when}\n");
+		if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
 		{
-			fprintf(yyoutSyntax, "{COMMAND -> BLOCK}\n");
-			back_token();
-			parser_BLOCK();
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		parser_EXPRESSION();
+		currentToken = next_token();
+		switch ((*currentToken).kind)
+		{
+		case REL_OP_LESS:
+		case REL_OP_EQUAL_OR_LESS:
+		case REL_OP_EQUAL:
+		case REL_OP_NOT_EQUAL:
+		case REL_OP_GREATER:
+		case REL_OP_EQUAL_OR_GREATER:
+		{
+			parser_EXPRESSION();
 			break;
 		}
 		default:
 		{
-			eTOKENS *expectedTokens[] = { ID,KEYWORD_WHEN, KEYWORD_FOR,KEYWORD_FREE,KEYWORD_BLOCK };
-			int sizeOfExpectedTokens = 5;
+			eTOKENS expectedTokens[] = { REL_OP_LESS , REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER , REL_OP_EQUAL_OR_GREATER };
+			int sizeOfExpectedTokens = 6;
 			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
 		}
+		}
+		if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(KEYWORD_DO) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		parser_COMMANDS();
+		if (match(SEPERATION_SIGN_SEMICOLON) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(KEYWORD_DEFAULT) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		parser_COMMANDS();
+		if (match(SEPERATION_SIGN_SEMICOLON) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(KEYWORD_END_WHEN) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		break;
+	}
+	case KEYWORD_FOR:
+	{
+		fprintf(yyoutSyntax, "{COMMAND -> for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for}\n");
+		if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(ID) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(ASSIGNMENT) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		parser_EXPRESSION();
+		if (match(SEPERATION_SIGN_SEMICOLON) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(ID) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		currentToken = next_token();
+		if (((*currentToken).kind == REL_OP_LESS) || (*currentToken).kind == REL_OP_EQUAL_OR_LESS || (*currentToken).kind == REL_OP_EQUAL || (*currentToken).kind == REL_OP_NOT_EQUAL || (*currentToken).kind == REL_OP_GREATER || (*currentToken).kind == REL_OP_EQUAL_OR_GREATER)
+		{
+			parser_EXPRESSION();
+		}
+		else
+		{
+			eTOKENS expectedArray[] = { REL_OP_EQUAL, REL_OP_LESS, REL_OP_NOT_EQUAL,REL_OP_EQUAL_OR_GREATER,REL_OP_GREATER,REL_OP_EQUAL_OR_LESS };
+			int expectedArraySize = 6;
+			char expectedTokensArray[256] = "";
+			for (int i = 0; i < expectedArraySize; i++)
+			{
+				strcat(expectedTokensArray, "'");
+				strcat(expectedTokensArray, stringFromeTOKENS(expectedArray[i]));
+				strcat(expectedTokensArray, "' ");
+			}
+			printErrorToTheFile(expectedTokensArray, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(SEPERATION_SIGN_SEMICOLON) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(ID) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(UNARY_OP_INCREMENT) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		parser_COMMANDS();
+		if (match(SEPERATION_SIGN_SEMICOLON) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(KEYWORD_END_FOR) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		break;
+	}
+	case KEYWORD_FREE:
+	{
+		fprintf(yyoutSyntax, "{COMMAND -> free(id)}\n");
+		if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(ID) == 0)
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		if (match(SEPERATION_SIGN_PARENT_CLOSE))
+		{
+			HandleMatchError(followArray, folowArraySize);
+			return;
+		}
+		break;
+	}
+	case KEYWORD_BLOCK:
+	{
+		fprintf(yyoutSyntax, "{COMMAND -> BLOCK}\n");
+		back_token();
+		parser_BLOCK();
+		break;
+	}
+	default:
+	{
+		eTOKENS *expectedTokens[] = { ID,KEYWORD_WHEN, KEYWORD_FOR,KEYWORD_FREE,KEYWORD_BLOCK };
+		int sizeOfExpectedTokens = 5;
+		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
+	}
 	}
 }
 
@@ -573,192 +591,47 @@ void parser_COMMANDS_TAG()
 	currentToken = next_token();
 	switch ((*currentToken).kind)
 	{
-		case KEYWORD_END:
-		case KEYWORD_END_FOR:
-		case KEYWORD_END_WHEN:
-		case KEYWORD_DEFAULT:
-		{
-			fprintf(yyoutSyntax, "{COMMAND_TAG -> Epsilon}\n");
-			back_token();
-			back_token();
-			break;
-		}
-		case ID:
-		case KEYWORD_WHEN:
-		case KEYWORD_FOR:
-		case KEYWORD_FREE:
-		case KEYWORD_BLOCK:
-		{
-			back_token();
-			parser_COMMAND();
-			parser_COMMANDS_TAG();
-			break;
-		}
-		default:
-		{
-			eTOKENS *expectedTokens[] = { ID,KEYWORD_WHEN, KEYWORD_FOR,KEYWORD_FREE,KEYWORD_BLOCK,KEYWORD_END,KEYWORD_END_FOR,KEYWORD_END_WHEN,KEYWORD_DEFAULT };
-			int sizeOfExpectedTokens = 9;
-			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
-			break;
-		}	
-	}
-}
-
-
-int match(eTOKENS i_ActualKind)
-{
-	int boolToReturn = 0;
-	currentToken = next_token();
-	if ((*currentToken).kind != i_ActualKind)
+	case KEYWORD_END:
+	case KEYWORD_END_FOR:
+	case KEYWORD_END_WHEN:
+	case KEYWORD_DEFAULT:
 	{
-		printErrorToTheFile(stringFromeTOKENS(i_ActualKind), (*currentToken).lineNumber ,stringFromeTOKENS((*currentToken).kind) ,(*currentToken).lexeme);
-		if ((*currentToken).kind == END_OF_FILE)
-		{
-			boolToReturn = 0;
-		}
-
-		boolToReturn = 0;
-		return boolToReturn;
-	}
-	else if (i_ActualKind == END_OF_FILE)
-	{
-		fprintf(yyoutSyntax, "EOF\n");
-		boolToReturn = 1;
-	}
-
-	boolToReturn = 1;
-	return boolToReturn;
-}
-
-void printErrorToTheFile(char* i_ExcepectedToken, int i_LineNumber, char* i_ActualToken, char* i_Lexeme)
-{
-	fprintf(yyoutSyntax, "Expected token %s at line: %d,\nActual token '%s', lexeme: '%s'.\n",
-		i_ExcepectedToken, i_LineNumber, i_ActualToken, i_Lexeme);
-}
-
-void REL_OP_CASES(Token *currentToken)
-{
-	eTOKENS followARR[] = { SEPERATION_SIGN_SEMICOLON };
-	eTOKENS expectedTokens[] = { REL_OP_LESS , REL_OP_EQUAL_OR_LESS , REL_OP_EQUAL , REL_OP_NOT_EQUAL , REL_OP_GREATER , REL_OP_EQUAL_OR_GREATER };
-	switch ((*currentToken).kind)
-	{
-	case REL_OP_LESS:
-	{
-		parser_EXPRESSION();
+		fprintf(yyoutSyntax, "{COMMAND_TAG -> Epsilon}\n");
+		back_token();
+		back_token();
 		break;
 	}
-	case REL_OP_EQUAL_OR_LESS:
+	case ID:
+	case KEYWORD_WHEN:
+	case KEYWORD_FOR:
+	case KEYWORD_FREE:
+	case KEYWORD_BLOCK:
 	{
-		parser_EXPRESSION();
+		back_token();
+		parser_COMMAND();
+		parser_COMMANDS_TAG();
 		break;
 	}
-	case REL_OP_EQUAL:
-	{
-		parser_EXPRESSION();
-		break;
-	}
-	case REL_OP_NOT_EQUAL:
-	{
-		parser_EXPRESSION();
-		break;
-	}
-	case REL_OP_GREATER:
-	{
-		parser_EXPRESSION();
-		break;
-	}
-	case REL_OP_EQUAL_OR_GREATER:
+	case ASSIGNMENT:
 	{
 		parser_EXPRESSION();
 		break;
 	}
 	default:
 	{
-		HandlingErrors(currentToken, followARR, 1, expectedTokens, 6);
+		eTOKENS *expectedTokens[] = { ID,KEYWORD_WHEN, KEYWORD_FOR,KEYWORD_FREE,KEYWORD_BLOCK,KEYWORD_END,KEYWORD_END_FOR,KEYWORD_END_WHEN,KEYWORD_DEFAULT };
+		int sizeOfExpectedTokens = 9;
+		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
+		break;
 	}
 	}
 }
-
-int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr, int followArrsize)
-{
-	int TokenFound = 0;
-	int i;
-
-	for (i = 0; i < followArrsize; i++)
-	{
-		if (followArr[i] == (*currentToken).kind)
-		{
-			TokenFound = 1;
-		}
-	}
-	return TokenFound;
-}
-
-void HandleMatchError(eTOKENS *i_FollowArray, int i_SizeOfFollowArray)
-{
-	int tokenFound = 0;
-	while (tokenFound == 0 && (*currentToken).kind != END_OF_FILE)
-	{
-		currentToken = next_token();
-		tokenFound = CheckIfTokenInFollowArr(currentToken, i_FollowArray, i_SizeOfFollowArray);
-	}
-	currentToken = back_token();
-}
-
-void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, eTOKENS *expectedTokens, int expectedTokensSize)
-{
-	int i;
-	char expectedTokensString[250] = "";
-	int tokenFound;
-	tokenFound = CheckIfTokenInFollowArr(currentToken, followArr, followArrSize);
-	for (i = 0; i < expectedTokensSize; i++)
-	{
-		strcat(expectedTokensString, "'");
-		strcat(expectedTokensString, stringFromeTOKENS(expectedTokens[i]));
-		strcat(expectedTokensString, "' ");
-	}
-	if (tokenFound == 1)
-	{
-		printErrorToTheFile(expectedTokens, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
-	}
-	while (tokenFound == 0 && (*currentToken).kind != END_OF_FILE)
-	{
-
-		if (expectedTokensSize == 1)
-		{
-			fprintf(yyoutSyntax, "Expected token %s at line: %d,\nActual token '%s', lexeme: '%s'.\n",
-				expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
-		}
-		else
-		{
-			fprintf(yyoutSyntax, "Expected one of tokens %s at line: %d,\nActual token '%s', lexeme: '%s'.\n",
-				expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
-		}
-		currentToken = next_token();
-		tokenFound = CheckIfTokenInFollowArr(currentToken, followArr, followArrSize);
-	}
-	currentToken = back_token();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 void parser_EXPRESSION()
 {
-	eTOKENS followARR[] = { SEPERATION_SIGN_SEMICOLON, REL_OP_LESS ,REL_OP_EQUAL_OR_LESS ,REL_OP_EQUAL ,REL_OP_NOT_EQUAL ,REL_OP_GREATER ,REL_OP_EQUAL_OR_GREATER ,SEPERATION_SIGN_PARENT_CLOSE ,SEPERATION_SIGN_BRACKET_CLOSE };
-	eTOKENS expectedTokens[] = { SEPERATION_SIGN_BRACKET_OPEN, REL_NUM , ID , UNARY_OP_AMP , KEYWORD_SIZE_OF };
+	eTOKENS followArray[] = { SEPERATION_SIGN_SEMICOLON, AR_OP_ADDITION ,AR_OP_DIVISION ,AR_OP_MULTIPLICATION ,AR_OP_MULTIPLICATION ,AR_OP_POWER ,AR_OP_SUBTRACTION ,SEPERATION_SIGN_PARENT_CLOSE ,SEPERATION_SIGN_BRACKET_CLOSE };
+	int followArraySize = 9;
+	fprintf(yyoutSyntax, "{EXPRESSION -> int_num | real_num | id EXPRESSION_TAG | &id | size_of(type_name)}\n");
 	currentToken = next_token();
 	switch ((*currentToken).kind)
 	{
@@ -781,44 +654,46 @@ void parser_EXPRESSION()
 	case UNARY_OP_AMP:
 	{
 		fprintf(yyoutSyntax, "{EXPRESSION -> &id}\n");
-		if (!match(ID))
+		if (match(ID) == 0)
 		{
-			HandlingErrors(currentToken, followARR, 9, expectedTokens, 5);
-			break;
+			HandleMatchError(followArray, followArraySize);
+			return;
 		}
 		break;
 	}
 	case KEYWORD_SIZE_OF:
 	{
 		fprintf(yyoutSyntax, "{EXPRESSION -> size_of(type_name)}\n");
-		if (!match(SEPERATION_SIGN_PARENT_OPEN))
+		if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
 		{
-			HandlingErrors(currentToken, followARR, 9, expectedTokens, 5);
-			break;
+			HandleMatchError(followArray, followArraySize);
+			return;
 		}
-		if (!match(ID))
+		if (match(ID) == 0)
 		{
-			HandlingErrors(currentToken, followARR, 9, expectedTokens, 5);
-			break;
+			HandleMatchError(followArray, followArraySize);
+			return;
 		}
-		if (!match(SEPERATION_SIGN_PARENT_CLOSE))
+		if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
 		{
-			HandlingErrors(currentToken, followARR, 9, expectedTokens, 5);
-			break;
+			HandleMatchError(followArray, followArraySize);
+			return;
 		}
 		break;
 	}
 	default:
 	{
-		HandlingErrors(currentToken, followARR, 9, expectedTokens, 5);
+		eTOKENS expectedTokens[] = { INT_NUM, REL_NUM , ID , UNARY_OP_AMP , KEYWORD_SIZE_OF };
+		int sizeOfExpectedTokens = 5;
+		HandlingErrors(currentToken, followArray, followArraySize, expectedTokens, sizeOfExpectedTokens);
 	}
 	}
 }
 
 void parser_EXPRESSION_TAG()
 {
-	eTOKENS followARR[] = { SEPERATION_SIGN_SEMICOLON, REL_OP_LESS ,REL_OP_EQUAL_OR_LESS ,REL_OP_EQUAL ,REL_OP_NOT_EQUAL ,REL_OP_GREATER ,REL_OP_EQUAL_OR_GREATER ,SEPERATION_SIGN_PARENT_CLOSE ,SEPERATION_SIGN_BRACKET_CLOSE };
-	eTOKENS expectedTokens[] = { SEPERATION_SIGN_BRACKET_OPEN , POINTER , AR_OP_ADDITION , AR_OP_SUBTRACTION , AR_OP_MULTIPLICATION , AR_OP_DIVISION , AR_OP_POWER,UNARY_OP_INCREMENT};
+	eTOKENS followArray[] = { SEPERATION_SIGN_SEMICOLON,UNARY_OP_INCREMENT,AR_OP_SUBTRACTION,AR_OP_ADDITION,AR_OP_DIVISION,AR_OP_MULTIPLICATION,AR_OP_POWER,SEPERATION_SIGN_BRACKET_CLOSE,SEPERATION_SIGN_PARENT_CLOSE };
+	int followArraySize = 9;
 	currentToken = next_token();
 	switch ((*currentToken).kind)
 	{
@@ -826,10 +701,10 @@ void parser_EXPRESSION_TAG()
 	{
 		fprintf(yyoutSyntax, "{EXPRESSION_TAG -> [EXPRESSION]}\n");
 		parser_EXPRESSION();
-		if (!match(SEPERATION_SIGN_BRACKET_CLOSE))
+		if (match(SEPERATION_SIGN_BRACKET_CLOSE) == 0)
 		{
-			HandlingErrors(currentToken, followARR, 9, expectedTokens, 8);
-			break;
+			HandleMatchError(followArray, followArraySize);
+			return;
 		}
 		break;
 	}
@@ -855,54 +730,147 @@ void parser_EXPRESSION_TAG()
 	case REL_OP_EQUAL_OR_LESS:
 	case REL_OP_GREATER:
 	case REL_OP_LESS:
+	case SEPERATION_SIGN_BRACKET_CLOSE:
 	{
 		fprintf(yyoutSyntax, "{EXPRESSION_TAG -> EPSILON}\n");
 		back_token();
 		break;
 	}
-
 	default:
 	{
-		HandlingErrors(currentToken, followARR, 9, expectedTokens, 8);
+		eTOKENS expectedTokens[] = { SEPERATION_SIGN_BRACKET_OPEN,POINTER,AR_OP_ADDITION,AR_OP_SUBTRACTION,AR_OP_MULTIPLICATION,AR_OP_DIVISION,UNARY_OP_INCREMENT,AR_OP_POWER,REL_OP_EQUAL,REL_OP_NOT_EQUAL,REL_OP_EQUAL_OR_GREATER,REL_OP_EQUAL_OR_LESS,REL_OP_GREATER,REL_OP_LESS,SEPERATION_SIGN_BRACKET_CLOSE };
+		int expectedTokenSize = 15;
+		HandlingErrors(currentToken, followArray, followArraySize, expectedTokens, expectedTokenSize);
 	}
 	}
-}
-
-void parser_RECIVER()
-{
-	if (!match(ID))
-	{
-		return;
-	}
-	parser_RECIVER_TAG();
 }
 
 void parser_RECIVER_TAG()
 {
-	eTOKENS followARR[] = { ASSIGNMENT };
-	eTOKENS expectedTokens[] = { SEPERATION_SIGN_BRACKET_OPEN , POINTER };
+	eTOKENS followArray[] = { ASSIGNMENT };
+	int sizeOfFollowArray = 1;
+	fprintf(yyoutSyntax, "{RECEIVER_TAG -> EPSILON | [EXPRESSION] | ^}\n");
 	currentToken = next_token();
 	switch ((*currentToken).kind)
 	{
-		case SEPERATION_SIGN_BRACKET_OPEN:
+	case SEPERATION_SIGN_BRACKET_OPEN:
+	{
+		fprintf(yyoutSyntax, "{RECIVER_TAG -> [EXPRESSION]}\n");
+		parser_EXPRESSION();
+		if (match(SEPERATION_SIGN_BRACKET_CLOSE) == 0)
 		{
-			fprintf(yyoutSyntax, "{RECIVER_TAG -> [EXPRESSION]}\n");
-			parser_EXPRESSION();
-			if (!match(SEPERATION_SIGN_BRACKET_CLOSE))
-			{
-				HandlingErrors(currentToken, followARR, 1, expectedTokens, 2);
-				break;
-			}
-			break;
+			HandleMatchError(followArray, sizeOfFollowArray);
+			return;
 		}
-		case POINTER:
-		{
-			fprintf(yyoutSyntax, "{RECIVER_TAG -> ^}\n");
-			break;
-		}
-		default:
-		{
-			HandlingErrors(currentToken, followARR, 1, expectedTokens, 2);
-		}
+		break;
+	}
+	case POINTER:
+	{
+		fprintf(yyoutSyntax, "{RECIVER_TAG -> ^}\n");
+		break;
+	}
+	case ASSIGNMENT:
+	{
+		fprintf(yyoutSyntax, "{RECEIVER_TAG -> EPSILON}\n");
+		currentToken = back_token();
+		break;
+	}
+	default:
+	{
+		eTOKENS expectedTokens[] = { SEPERATION_SIGN_BRACKET_OPEN , POINTER,ASSIGNMENT };
+		int sizeOfExpectedTokens = 3;
+		HandlingErrors(currentToken, followArray, 1, expectedTokens, sizeOfExpectedTokens);
+	}
 	}
 }
+
+int match(eTOKENS i_ActualKind)
+{
+	int boolToReturn = 0;
+	currentToken = next_token();
+	if ((*currentToken).kind != i_ActualKind)
+	{
+		printErrorToTheFile(stringFromeTOKENS(i_ActualKind), (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+		if ((*currentToken).kind == END_OF_FILE)
+		{
+			boolToReturn = 0;
+		}
+		boolToReturn = 0;
+		return boolToReturn;
+	}
+	else if (i_ActualKind == END_OF_FILE)
+	{
+		fprintf(yyoutSyntax, "EOF\n");
+		boolToReturn = 1;
+	}
+
+	boolToReturn = 1;
+	return boolToReturn;
+}
+
+void printErrorToTheFile(char* i_ExcepectedToken, int i_LineNumber, char* i_ActualToken, char* i_Lexeme)
+{
+	fprintf(yyoutSyntax, "Expected token %s at line: %d,\nActual token '%s', lexeme: '%s'.\n",
+		i_ExcepectedToken, i_LineNumber, i_ActualToken, i_Lexeme);
+}
+
+int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr, int followArrsize)
+{
+	int TokenFound = 0;
+	int i;
+
+	for (i = 0; i < followArrsize; i++)
+	{
+		if (followArr[i] == (*currentToken).kind)
+		{
+			TokenFound = 1;
+		}
+	}
+	return TokenFound;
+}
+
+void HandleMatchError(eTOKENS *i_FollowArray, int i_SizeOfFollowArray)
+{
+	int tokenFound = 0;
+	tokenFound = CheckIfTokenInFollowArr(currentToken, i_FollowArray, i_SizeOfFollowArray);
+	while (tokenFound == 0 && (*currentToken).kind != END_OF_FILE)
+	{
+		currentToken = next_token();
+		tokenFound = CheckIfTokenInFollowArr(currentToken, i_FollowArray, i_SizeOfFollowArray);
+	}
+	currentToken = back_token();
+}
+
+void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, eTOKENS *expectedTokens, int expectedTokensSize)
+{
+	int i;
+	char expectedTokensString[250] = "";
+	int tokenFound;
+	tokenFound = CheckIfTokenInFollowArr(currentToken, followArr, followArrSize);
+	for (i = 0; i < expectedTokensSize; i++)
+	{
+		strcat(expectedTokensString, "'");
+		strcat(expectedTokensString, stringFromeTOKENS(expectedTokens[i]));
+		strcat(expectedTokensString, "' ");
+	}
+	if (tokenFound == 1)
+	{
+		printErrorToTheFile(expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+	}
+	while (tokenFound == 0 && (*currentToken).kind != END_OF_FILE)
+	{
+
+		if (expectedTokensSize == 1)
+		{
+			printErrorToTheFile(expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+		}
+		else
+		{
+			printErrorToTheFile(expectedTokensString, (*currentToken).lineNumber, stringFromeTOKENS((*currentToken).kind), (*currentToken).lexeme);
+		}
+		currentToken = next_token();
+		tokenFound = CheckIfTokenInFollowArr(currentToken, followArr, followArrSize);
+	}
+	currentToken = back_token();
+}
+

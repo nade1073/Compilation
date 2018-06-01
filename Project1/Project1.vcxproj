@@ -112,14 +112,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DataStruct.h" />
     <ClInclude Include="HashTable.h" />
     <ClInclude Include="Parser.h" />
+    <ClInclude Include="Stack.h" />
     <ClInclude Include="Token.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="HashTable.c" />
     <ClCompile Include="lex.yy.c" />
     <ClCompile Include="Parser.c" />
+    <ClCompile Include="Stack.c" />
     <ClCompile Include="Token.c" />
   </ItemGroup>
   <ItemGroup>
