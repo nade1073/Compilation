@@ -13,41 +13,43 @@ HashTable* createHashTable()
 {
 	HashTable* hashTableToReturn = (HashTable*)malloc(sizeof(HashTable));
 	hashTableToReturn->m_SizeOfContent = SIZE;
-	hashTableToReturn->m_Content = (DataItem**)malloc(sizeof(DataItem*));
+	hashTableToReturn->m_Content = (DataItem*)malloc(sizeof(DataItem)*SIZE);
 	return hashTableToReturn;
 }
 
-struct DataItem* searchInsideHashTableAndReturnItem(HashTable i_CurrentHashTable, int i_Key)
+struct DataItem* searchInsideHashTableAndReturnItem(HashTable* i_CurrentHashTable, int i_Key)
 {
-	int hashIndex = hashCode(i_CurrentHashTable.m_SizeOfContent,i_Key);
-	while (   (i_CurrentHashTable).m_Content[hashIndex]   != NULL)
+	int hashIndex = hashCode((*i_CurrentHashTable).m_SizeOfContent,i_Key);
+
+	while ((*i_CurrentHashTable).m_Content[hashIndex].m_Data != NULL)
 	{
-		if ((i_CurrentHashTable.m_Content[hashIndex])->m_Key == i_Key)
+		if ((*i_CurrentHashTable).m_Content[hashIndex].m_Key == i_Key)
 		{
-			return i_CurrentHashTable.m_Content[hashIndex];
+			return i_CurrentHashTable->m_Content[hashIndex].m_Data;
 		}
+
 		//go to next cell
 		++hashIndex;
 		//wrap around the table
-		hashIndex %= (i_CurrentHashTable).m_SizeOfContent;
+		hashIndex %= (*i_CurrentHashTable).m_SizeOfContent;
 	}
 	return NULL;
 }
  
-void insert(HashTable i_CurrentHashTable, DataItem* i_Data)
+void insert(HashTable* i_CurrentHashTable, DataItem* i_Data)
 {
 	//get the hash 
-	int hashIndex = hashCode(i_CurrentHashTable.m_SizeOfContent,i_Data->m_Key);
+	int hashIndex = hashCode((*i_CurrentHashTable).m_SizeOfContent,i_Data->m_Key);
 
 	//move in array until an empty or deleted cell
-	while ((i_CurrentHashTable).m_Content[hashIndex] != NULL)
+	while ((*i_CurrentHashTable).m_Content[hashIndex].m_Data != NULL)
 	{
 		//go to next cell
 		++hashIndex;
 		//wrap around the table
-		hashIndex %= (i_CurrentHashTable).m_SizeOfContent;
+		hashIndex %= (*i_CurrentHashTable).m_SizeOfContent;
 	}
-	i_CurrentHashTable.m_Content[hashIndex] = i_Data;
+	(*i_CurrentHashTable).m_Content[hashIndex].m_Data = i_Data;
 }
 
 void deleteItem(HashTable i_CurrentHashTable,DataItem* i_Item)

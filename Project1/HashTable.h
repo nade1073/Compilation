@@ -14,13 +14,13 @@ typedef struct DataItem
 
 typedef struct HashTable
 {
-	struct DataItem** m_Content;
+	struct DataItem* m_Content;
 	int m_SizeOfContent;
 }HashTable;
 int hashCode(int i_Size, int i_Key);
 HashTable* createHashTable();
 DataItem* searchInsideHashTableAndReturnItem(HashTable i_CurrentHashTable, int i_Key);
-void insert(struct HashTable i_CurrentHashTable, DataItem* i_Data);
+void insert(HashTable* i_CurrentHashTable, DataItem* i_Data);
 void deleteItem(struct HashTable i_CurrentHashTable, DataItem* i_Item);
 
 #endif 

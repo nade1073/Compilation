@@ -3,7 +3,6 @@
 
 typedef struct Data
 {
-	int key;
 	char* name;
 	enum eRoleTypes role;
 	char* typeOfVariable;

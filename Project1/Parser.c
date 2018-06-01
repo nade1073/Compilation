@@ -1,14 +1,17 @@
 ﻿#include <stdio.h>
 #include "Parser.h"
 #include "Token.h"
+#include "Stack.h"
 #include <string.h>
 
 FILE *yyoutSyntax;
 Token *currentToken;
-
+StackOfHashTables* stack;
+DataItem* tempDataItem;
 
 void parser_PROGRAM()
 {
+	stack = createStack();
 	fprintf(yyoutSyntax, "{PROGRAM -> BLOCK}\n");
 	parser_BLOCK();
 	match(END_OF_FILE);
@@ -25,6 +28,10 @@ void parser_BLOCK()
 		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
+
+
+	HashTable* hashTableToPushToStack = createHashTable();
+	push(stack,hashTableToPushToStack);
 
 	parser_DEFINITIONS();
 	if (match(SEPERATION_SIGN_SEMICOLON) == 0)
@@ -51,6 +58,7 @@ void parser_BLOCK()
 		HandleMatchError(followArray, folowArraySize);
 		return;
 	}
+	pop(stack);
 }
 
 void parser_DEFINITIONS()
@@ -68,41 +76,49 @@ void parser_DEFINITION()
 	int expectedTokensArraySize = 2;
 	currentToken = next_token();
 	fprintf(yyoutSyntax, "{DEFINITION -> VAR_DEFINITION | TYPE_DEFINITION}\n");
-
+	if (tempDataItem != NULL)
+	{
+		free(tempDataItem);
+	}
+	tempDataItem = (DataItem*)malloc(sizeof(DataItem));
 	switch ((*currentToken).kind)
 	{
-	case ID:
-	{
-		fprintf(yyoutSyntax, "{VAR_DEFINITION -> id: VAR_DEFINITION_TAG}\n");
-		if (match(SEPERATION_SIGN_COLON) == 0)
+		case ID:
 		{
-			HandleMatchError(followArray, folowArraySize);
-			break;
-		}
+			tempDataItem->m_Data = (Data*)malloc(sizeof(DataItem));
+			tempDataItem->m_Data->name = currentToken->lexeme;
+			tempDataItem->m_Data->categoryOfType = Basic;
+			tempDataItem->m_Data->role = Variable;
 
-		parser_VAR_DEFINITION_TAG();
-		break;
-	}
-	case KEYWORD_TYPE:
-	{
-		fprintf(yyoutSyntax, "{TYPE_DEFINITION -> type type_name is TYPE_INDICATOR}\n");
-		if (match(ID) == 0)
-		{
-			HandleMatchError(followArray, folowArraySize);
+			fprintf(yyoutSyntax, "{VAR_DEFINITION -> id: VAR_DEFINITION_TAG}\n");
+			if (match(SEPERATION_SIGN_COLON) == 0)
+			{
+				HandleMatchError(followArray, folowArraySize);
+				break;
+			}
+			parser_VAR_DEFINITION_TAG();
 			break;
 		}
-		if (match(KEYWORD_IS) == 0)
+		case KEYWORD_TYPE:
 		{
-			HandleMatchError(followArray, folowArraySize);
+			fprintf(yyoutSyntax, "{TYPE_DEFINITION -> type type_name is TYPE_INDICATOR}\n");
+			if (match(ID) == 0)
+			{
+				HandleMatchError(followArray, folowArraySize);
+				break;
+			}
+			if (match(KEYWORD_IS) == 0)
+			{
+				HandleMatchError(followArray, folowArraySize);
+				break;
+			}
+			parser_TYPE_INDICATOR();
 			break;
 		}
-		parser_TYPE_INDICATOR();
-		break;
-	}
-	default:
-	{
-		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, expectedTokensArraySize);
-	}
+		default:
+		{
+			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, expectedTokensArraySize);
+		}
 	}
 }
 
@@ -154,25 +170,29 @@ void parser_VAR_DEFINITION_TAG()
 	fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC TYPE | type_name}\n");
 	switch ((*currentToken).kind)
 	{
-	case KEYWORD_INTEGER:
-	{
-		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> INTEGER}\n");
-		break;
-	}
-	case KEYWORD_REAL:
-	{
-		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> REAL}\n");
-		break;
-	}
-	case ID:
-	{
-		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> type_name}\n");
-		break;
-	}
-	default:
-	{
-		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokensArray);
-	}
+		case KEYWORD_INTEGER:
+		{
+			tempDataItem->m_Data->typeOfVariable = stringFromeTOKENS(KEYWORD_INTEGER);
+			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> INTEGER}\n");
+			HashTable* m_CurrentHashTableOfBlock = top(stack);
+			insert(m_CurrentHashTableOfBlock, tempDataItem);
+			break;
+		}
+		case KEYWORD_REAL:
+		{
+			tempDataItem->m_Data->typeOfVariable = stringFromeTOKENS(KEYWORD_REAL);
+			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> REAL}\n");
+			break;
+		}
+		case ID:
+		{
+			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> type_name}\n");
+			break;
+		}
+		default:
+		{
+			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokensArray);
+		}
 	}
 }
 
