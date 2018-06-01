@@ -1,121 +1,95 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "DataStruct.h"
+#include "HashTable.h"
 
 #define SIZE 5000
 
-typedef struct DataItem
-{
-	struct Data* data;
-	int key;
-}DataItem;
 
-DataItem* hashArray[SIZE];
-DataItem* dummyItem;
-DataItem* item;
 
-int hashCode(int key)
+int hashCode(int i_Size,int i_Key)
 {
-	return key % SIZE;
+	return i_Key%i_Size;
 }
 
-struct DataItem* createHashTable()
+HashTable* createHashTable()
 {
-	DataItem* Dataitem = (DataItem*)malloc(sizeof(DataItem));
-	return Dataitem;
+	HashTable* hashTableToReturn = (HashTable*)malloc(sizeof(HashTable));
+	hashTableToReturn->m_SizeOfContent = SIZE;
+	hashTableToReturn->m_Content = (DataItem**)malloc(sizeof(DataItem*));
+	return hashTableToReturn;
 }
 
-struct DataItem *search(int key)
+struct DataItem* searchInsideHashTableAndReturnItem(HashTable i_CurrentHashTable, int i_Key)
 {
-	//get the hash 
-	int hashIndex = hashCode(key);
-
-	//move in array until an empty 
-	while (hashArray[hashIndex] != NULL)
+	int hashIndex = hashCode(i_CurrentHashTable.m_SizeOfContent,i_Key);
+	while (   (i_CurrentHashTable).m_Content[hashIndex]   != NULL)
 	{
-		if (hashArray[hashIndex]->key == key)
+		if ((i_CurrentHashTable.m_Content[hashIndex])->m_Key == i_Key)
 		{
-			return hashArray[hashIndex];
+			return i_CurrentHashTable.m_Content[hashIndex];
 		}
-
 		//go to next cell
 		++hashIndex;
-
 		//wrap around the table
-		hashIndex %= SIZE;
+		hashIndex %= (i_CurrentHashTable).m_SizeOfContent;
 	}
-
 	return NULL;
 }
-
-void insert(int key, Data* data)
+ 
+void insert(HashTable i_CurrentHashTable, DataItem* i_Data)
 {
 	//get the hash 
-	int hashIndex = hashCode(key);
-
-	DataItem *item = (DataItem*)malloc(sizeof(DataItem));
-	item->data = data;
-	item->key = key;
+	int hashIndex = hashCode(i_CurrentHashTable.m_SizeOfContent,i_Data->m_Key);
 
 	//move in array until an empty or deleted cell
-	while (hashArray[hashIndex] != NULL && hashArray[hashIndex]->key != -1)
+	while ((i_CurrentHashTable).m_Content[hashIndex] != NULL)
 	{
 		//go to next cell
 		++hashIndex;
-
 		//wrap around the table
-		hashIndex %= SIZE;
+		hashIndex %= (i_CurrentHashTable).m_SizeOfContent;
 	}
-
-	hashArray[hashIndex] = item;
+	i_CurrentHashTable.m_Content[hashIndex] = i_Data;
 }
 
-struct DataItem* deleteItem(DataItem* item)
+void deleteItem(HashTable i_CurrentHashTable,DataItem* i_Item)
 {
-	int key = item->key;
+	int key = i_Item->m_Key;
 
 	//get the hash 
-	int hashIndex = hashCode(key);
+	int hashIndex = hashCode(i_CurrentHashTable.m_SizeOfContent,key);
 
 	//move in array until an empty
-	while (hashArray[hashIndex] != NULL)
+	while ((i_CurrentHashTable).m_Content[hashIndex] != NULL)
 	{
 
-		if (hashArray[hashIndex]->key == key)
+		if ((i_CurrentHashTable.m_Content[hashIndex])->m_Key == key)
 		{
-			DataItem* temp = hashArray[hashIndex];
-
-			//assign a dummy item at deleted position
-			hashArray[hashIndex] = dummyItem;
-			return temp;
+			//i_CurrentHashTable.m_Content[hashIndex] = NULL;
+			free(i_CurrentHashTable.m_Content[hashIndex]);
+			//Or Free
+			break;
 		}
-
 		//go to next cell
 		++hashIndex;
-
 		//wrap around the table
-		hashIndex %= SIZE;
+		hashIndex %= (i_CurrentHashTable).m_SizeOfContent;
 	}
-
-	return NULL;
 }
 
-void display()
-{
-	int i = 0;
-
-	for (i = 0; i<SIZE; i++)
-	{
-		if (hashArray[i] != NULL)
-		{
-			printf(" (%d,%d)", hashArray[i]->key, hashArray[i]->data);
-		}
-		else
-		{
-			printf(" ~~ ");
-		}
-	}
-
-	printf("\n");
-}
+//void display()
+//{
+//	int i = 0;
+//
+//	for (i = 0; i<SIZE; i++)
+//	{
+//		if (hashArray[i] != NULL)
+//		{
+//			printf(" (%d,%d)", hashArray[i]->key, hashArray[i]->data);
+//		}
+//		else
+//		{
+//			printf(" ~~ ");
+//		}
+//	}
+//
+//	printf("\n");
+//}
