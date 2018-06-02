@@ -19,9 +19,9 @@ typedef struct HashTable
 }HashTable;
 int hashCode(int i_Size, int i_Key);
 HashTable* createHashTable();
-DataItem* searchInsideHashTableAndReturnItem(HashTable i_CurrentHashTable, int i_Key);
+DataItem* searchInsideHashTableAndReturnItem(HashTable* i_CurrentHashTable, int i_Key);
 void insert(HashTable* i_CurrentHashTable, DataItem* i_Data);
 void deleteItem(struct HashTable i_CurrentHashTable, DataItem* i_Item);
-
+int StringToIntHash(const char* s);
 #endif 
 

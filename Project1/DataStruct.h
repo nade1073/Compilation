@@ -8,7 +8,8 @@ typedef struct Data
 	char* typeOfVariable;
 	enum eCategoryOfType categoryOfType;
 	struct Data* subType;
-	int sizeOfArray;
+	char* basicSubTypeName;
+	char* sizeOfArray;
 }Data;
 
 typedef enum eRoleTypes

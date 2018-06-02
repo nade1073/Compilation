@@ -24,4 +24,5 @@ void parser_RECIVER_TAG();
 void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, eTOKENS *expectedTokens, int expectedTokensSize);
 void HandleMatchError(eTOKENS *i_FollowArray, int i_SizeOfFollowArray);
 void printErrorToTheFile(char* i_ExcepectedToken, int i_LineNumber, char* i_ActualToken, char* i_Lexeme);
+void insterToHashTableIfIdIsValid();
 #endif

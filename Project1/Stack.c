@@ -12,11 +12,11 @@ void push(StackOfHashTables* i_Stack, HashTable* i_Table)
 	i_Stack->head = tempNode;
 }
 
-void pop(StackOfHashTables* i_Stack)
+HashTable* pop(StackOfHashTables* i_Stack)
 {
 	NodeOfStack *tempNode = i_Stack->head;
 	i_Stack->head = i_Stack->head->m_NextNode;
-	free(tempNode);
+	return tempNode->m_HashTable;
 }
 
 int isEmpty(StackOfHashTables* i_Stack)
@@ -34,4 +34,12 @@ StackOfHashTables* createStack()
 	StackOfHashTables* stackToReturn = (StackOfHashTables*)malloc(sizeof(StackOfHashTables));
 	stackToReturn->head = NULL;
 	return stackToReturn;
+}
+
+void pushAllItemFromFirstStackToSecondStack(StackOfHashTables* i_First, StackOfHashTables* i_Second)
+{
+	while (!isEmpty(i_First))
+	{
+		push(i_Second,pop(i_First));
+	}
 }

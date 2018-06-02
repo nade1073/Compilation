@@ -76,20 +76,16 @@ void parser_DEFINITION()
 	int expectedTokensArraySize = 2;
 	currentToken = next_token();
 	fprintf(yyoutSyntax, "{DEFINITION -> VAR_DEFINITION | TYPE_DEFINITION}\n");
-	if (tempDataItem != NULL)
-	{
-		free(tempDataItem);
-	}
-	tempDataItem = (DataItem*)malloc(sizeof(DataItem));
+	tempDataItem = calloc(1,sizeof(DataItem));
+	tempDataItem->m_Data = (Data*)calloc(1, sizeof(Data));
 	switch ((*currentToken).kind)
 	{
 		case ID:
 		{
-			tempDataItem->m_Data = (Data*)malloc(sizeof(DataItem));
+		
 			tempDataItem->m_Data->name = currentToken->lexeme;
-			tempDataItem->m_Data->categoryOfType = Basic;
 			tempDataItem->m_Data->role = Variable;
-
+			tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
 			fprintf(yyoutSyntax, "{VAR_DEFINITION -> id: VAR_DEFINITION_TAG}\n");
 			if (match(SEPERATION_SIGN_COLON) == 0)
 			{
@@ -101,12 +97,15 @@ void parser_DEFINITION()
 		}
 		case KEYWORD_TYPE:
 		{
+			tempDataItem->m_Data->role = UserDefinedType;
 			fprintf(yyoutSyntax, "{TYPE_DEFINITION -> type type_name is TYPE_INDICATOR}\n");
 			if (match(ID) == 0)
 			{
 				HandleMatchError(followArray, folowArraySize);
 				break;
 			}
+			tempDataItem->m_Data->name = currentToken->lexeme;
+			tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
 			if (match(KEYWORD_IS) == 0)
 			{
 				HandleMatchError(followArray, folowArraySize);
@@ -134,6 +133,12 @@ void parser_DEFINITIONS_TAG()
 		HandleMatchError(followArray, followArraySize);
 		return;
 	}
+	if (tempDataItem!=NULL) //ERROR HANDLER NEED TO NULL THE POINTER
+	{
+		insterToHashTableIfIdIsValid();
+	}
+
+
 	currentToken = next_token();
 	switch ((*currentToken).kind)
 	{
@@ -174,8 +179,6 @@ void parser_VAR_DEFINITION_TAG()
 		{
 			tempDataItem->m_Data->typeOfVariable = stringFromeTOKENS(KEYWORD_INTEGER);
 			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> INTEGER}\n");
-			HashTable* m_CurrentHashTableOfBlock = top(stack);
-			insert(m_CurrentHashTableOfBlock, tempDataItem);
 			break;
 		}
 		case KEYWORD_REAL:
@@ -186,6 +189,7 @@ void parser_VAR_DEFINITION_TAG()
 		}
 		case ID:
 		{
+			tempDataItem->m_Data->typeOfVariable = ((*currentToken).lexeme);
 			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> type_name}\n");
 			break;
 		}
@@ -209,17 +213,22 @@ void parser_TYPE_INDICATOR()
 	{
 	case KEYWORD_INTEGER:
 	{
+		tempDataItem->m_Data->categoryOfType = Basic;
+		tempDataItem->m_Data->basicSubTypeName = stringFromeTOKENS(KEYWORD_INTEGER);
 		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> BASIC_TYPE -> INTEGER}\n");
 		break;
 	}
 
 	case KEYWORD_REAL:
 	{
+		tempDataItem->m_Data->categoryOfType = Basic;
+		tempDataItem->m_Data->basicSubTypeName = stringFromeTOKENS(KEYWORD_REAL);
 		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> BASIC_TYPE -> REAL}\n");
 		break;
 	}
 	case KEYWORD_ARRAY:
 	{
+		tempDataItem->m_Data->categoryOfType = Array;
 		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE}\n");
 		if (match(SEPERATION_SIGN_BRACKET_OPEN) == 0)
 		{
@@ -231,6 +240,7 @@ void parser_TYPE_INDICATOR()
 			HandleMatchError(followArray, folowArraySize);
 			break;
 		}
+		tempDataItem->m_Data->sizeOfArray = currentToken->lexeme;
 		if (match(SEPERATION_SIGN_BRACKET_CLOSE) == 0)
 		{
 			HandleMatchError(followArray, folowArraySize);
@@ -247,11 +257,13 @@ void parser_TYPE_INDICATOR()
 		{
 		case KEYWORD_INTEGER:
 		{
+			tempDataItem->m_Data->basicSubTypeName = stringFromeTOKENS(KEYWORD_INTEGER);
 			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE -> array [INT_NUM] of INTEGER }\n");
 			break;
 		}
 		case KEYWORD_REAL:
 		{
+			tempDataItem->m_Data->basicSubTypeName = stringFromeTOKENS(KEYWORD_REAL);
 			fprintf(yyoutSyntax, "{TYPE_INDICATOR -> ARRAY_TYPE -> array [INT_NUM] of REAL }\n");
 			break;
 		}
@@ -266,6 +278,7 @@ void parser_TYPE_INDICATOR()
 	}
 	case POINTER:
 	{
+		tempDataItem->m_Data->categoryOfType = POINTER;
 		fprintf(yyoutSyntax, "{TYPE_INDICATOR -> POINTER_TYPE -> ^POINTER_TYPE_TAG}\n");
 		parser_POINTER_TYPE_TAG();
 		break;
@@ -289,16 +302,19 @@ void parser_POINTER_TYPE_TAG()
 	{
 	case KEYWORD_INTEGER:
 	{
+		tempDataItem->m_Data->basicSubTypeName = stringFromeTOKENS(KEYWORD_INTEGER);
 		fprintf(yyoutSyntax, "{POINTER_TYPE_TAG -> ^INTEGER}\n");
 		break;
 	}
 	case KEYWORD_REAL:
 	{
+		tempDataItem->m_Data->basicSubTypeName = stringFromeTOKENS(KEYWORD_REAL);
 		fprintf(yyoutSyntax, "{POINTER_TYPE_TAG -> ^REAL}\n");
 		break;
 	}
 	case ID:
 	{
+		tempDataItem->m_Data->basicSubTypeName = currentToken->lexeme;
 		fprintf(yyoutSyntax, "{POINTER_TYPE_TAG -> ^type_name}\n");
 		break;
 	}
@@ -851,6 +867,7 @@ int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr, int followA
 
 void HandleMatchError(eTOKENS *i_FollowArray, int i_SizeOfFollowArray)
 {
+	tempDataItem = NULL;
 	int tokenFound = 0;
 	tokenFound = CheckIfTokenInFollowArr(currentToken, i_FollowArray, i_SizeOfFollowArray);
 	while (tokenFound == 0 && (*currentToken).kind != END_OF_FILE)
@@ -863,6 +880,7 @@ void HandleMatchError(eTOKENS *i_FollowArray, int i_SizeOfFollowArray)
 
 void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, eTOKENS *expectedTokens, int expectedTokensSize)
 {
+	tempDataItem = NULL;
 	int i;
 	char expectedTokensString[250] = "";
 	int tokenFound;
@@ -894,3 +912,56 @@ void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, 
 	currentToken = back_token();
 }
 
+void insterToHashTableIfIdIsValid()
+{
+	char* currentTypeOfVariable = NULL;
+	if (tempDataItem->m_Data->role == Variable)
+	{
+		 currentTypeOfVariable = tempDataItem->m_Data->typeOfVariable;
+	}
+	else
+	{
+		currentTypeOfVariable = tempDataItem->m_Data->basicSubTypeName;
+	}
+	char* integerType = stringFromeTOKENS(KEYWORD_INTEGER);
+	char* realType = stringFromeTOKENS(KEYWORD_REAL);
+	int insertCurrentTokenToHashTable=1;
+	HashTable* tempHashTable = top(stack);
+	DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, tempDataItem->m_Key);
+	if (currentDataItem != NULL)
+	{
+		//PRINT EROR ID - THERE IS SAME ID IN THIS SCOPE
+		return;
+	}
+	if (((strcmp((currentTypeOfVariable), integerType) != 0) && (strcmp((currentTypeOfVariable), realType) != 0)))
+	{
+		insertCurrentTokenToHashTable = searchInsideHashTableIfTheSubTypeExist();
+		if (insertCurrentTokenToHashTable == 0)
+		{
+			//ERROR THERE IS NO SUB TYPE INSIDE ALL THE BLOCK
+		}
+	}
+	if (insertCurrentTokenToHashTable == 1)
+	{
+		insert(top(stack), tempDataItem);
+	}
+}
+
+int searchInsideHashTableIfTheSubTypeExist()
+{
+	int isIdExsitsInAllHashTables = 0;
+	StackOfHashTables* tempStack = createStack();
+	while (!isEmpty(stack) && isIdExsitsInAllHashTables==0)
+	{
+		HashTable* tempHashTable = pop(stack);
+		DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, StringToIntHash(tempDataItem->m_Data->basicSubTypeName));
+		if (currentDataItem != NULL)
+		{
+			isIdExsitsInAllHashTables = 1;
+			tempDataItem->m_Data->subType = currentDataItem;
+		}
+		push(tempStack, tempHashTable);
+	}
+	pushAllItemFromFirstStackToSecondStack(tempStack, stack);
+	return isIdExsitsInAllHashTables;
+}

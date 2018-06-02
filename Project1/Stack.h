@@ -17,7 +17,8 @@ typedef struct StackOfHashTables
 
 int isEmpty( StackOfHashTables* i_Stack);
 void push(StackOfHashTables* i_Stack, HashTable* i_Table);
-void pop(StackOfHashTables* i_Stack);
+HashTable* pop(StackOfHashTables* i_Stack);
+void pushAllItemFromFirstStackToSecondStack(StackOfHashTables* i_First, StackOfHashTables* i_Second);
 HashTable* top(StackOfHashTables*);
 StackOfHashTables* createStack();
 
