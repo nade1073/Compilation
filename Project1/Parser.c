@@ -31,7 +31,7 @@ void parser_BLOCK()
 
 
 	HashTable* hashTableToPushToStack = createHashTable();
-	push(stack,hashTableToPushToStack);
+	push(stack, hashTableToPushToStack);
 
 	parser_DEFINITIONS();
 	if (match(SEPERATION_SIGN_SEMICOLON) == 0)
@@ -76,48 +76,48 @@ void parser_DEFINITION()
 	int expectedTokensArraySize = 2;
 	currentToken = next_token();
 	fprintf(yyoutSyntax, "{DEFINITION -> VAR_DEFINITION | TYPE_DEFINITION}\n");
-	tempDataItem = calloc(1,sizeof(DataItem));
+	tempDataItem = calloc(1, sizeof(DataItem));
 	tempDataItem->m_Data = (Data*)calloc(1, sizeof(Data));
 	switch ((*currentToken).kind)
 	{
-		case ID:
+	case ID:
+	{
+
+		tempDataItem->m_Data->name = currentToken->lexeme;
+		tempDataItem->m_Data->role = Variable;
+		tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
+		fprintf(yyoutSyntax, "{VAR_DEFINITION -> id: VAR_DEFINITION_TAG}\n");
+		if (match(SEPERATION_SIGN_COLON) == 0)
 		{
-		
-			tempDataItem->m_Data->name = currentToken->lexeme;
-			tempDataItem->m_Data->role = Variable;
-			tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
-			fprintf(yyoutSyntax, "{VAR_DEFINITION -> id: VAR_DEFINITION_TAG}\n");
-			if (match(SEPERATION_SIGN_COLON) == 0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			parser_VAR_DEFINITION_TAG();
+			HandleMatchError(followArray, folowArraySize);
 			break;
 		}
-		case KEYWORD_TYPE:
+		parser_VAR_DEFINITION_TAG();
+		break;
+	}
+	case KEYWORD_TYPE:
+	{
+		tempDataItem->m_Data->role = UserDefinedType;
+		fprintf(yyoutSyntax, "{TYPE_DEFINITION -> type type_name is TYPE_INDICATOR}\n");
+		if (match(ID) == 0)
 		{
-			tempDataItem->m_Data->role = UserDefinedType;
-			fprintf(yyoutSyntax, "{TYPE_DEFINITION -> type type_name is TYPE_INDICATOR}\n");
-			if (match(ID) == 0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			tempDataItem->m_Data->name = currentToken->lexeme;
-			tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
-			if (match(KEYWORD_IS) == 0)
-			{
-				HandleMatchError(followArray, folowArraySize);
-				break;
-			}
-			parser_TYPE_INDICATOR();
+			HandleMatchError(followArray, folowArraySize);
 			break;
 		}
-		default:
+		tempDataItem->m_Data->name = currentToken->lexeme;
+		tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
+		if (match(KEYWORD_IS) == 0)
 		{
-			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, expectedTokensArraySize);
+			HandleMatchError(followArray, folowArraySize);
+			break;
 		}
+		parser_TYPE_INDICATOR();
+		break;
+	}
+	default:
+	{
+		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, expectedTokensArraySize);
+	}
 	}
 }
 
@@ -133,7 +133,7 @@ void parser_DEFINITIONS_TAG()
 		HandleMatchError(followArray, followArraySize);
 		return;
 	}
-	if (tempDataItem!=NULL) //ERROR HANDLER NEED TO NULL THE POINTER
+	if (tempDataItem != NULL) //ERROR HANDLER NEED TO NULL THE POINTER
 	{
 		insterToHashTableIfIdIsValid();
 	}
@@ -175,28 +175,28 @@ void parser_VAR_DEFINITION_TAG()
 	fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC TYPE | type_name}\n");
 	switch ((*currentToken).kind)
 	{
-		case KEYWORD_INTEGER:
-		{
-			tempDataItem->m_Data->typeOfVariable = stringFromeTOKENS(KEYWORD_INTEGER);
-			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> INTEGER}\n");
-			break;
-		}
-		case KEYWORD_REAL:
-		{
-			tempDataItem->m_Data->typeOfVariable = stringFromeTOKENS(KEYWORD_REAL);
-			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> REAL}\n");
-			break;
-		}
-		case ID:
-		{
-			tempDataItem->m_Data->typeOfVariable = ((*currentToken).lexeme);
-			fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> type_name}\n");
-			break;
-		}
-		default:
-		{
-			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokensArray);
-		}
+	case KEYWORD_INTEGER:
+	{
+		tempDataItem->m_Data->typeOfVariable = stringFromeTOKENS(KEYWORD_INTEGER);
+		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> INTEGER}\n");
+		break;
+	}
+	case KEYWORD_REAL:
+	{
+		tempDataItem->m_Data->typeOfVariable = stringFromeTOKENS(KEYWORD_REAL);
+		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> BASIC_TYPE -> REAL}\n");
+		break;
+	}
+	case ID:
+	{
+		tempDataItem->m_Data->typeOfVariable = ((*currentToken).lexeme);
+		fprintf(yyoutSyntax, "{VAR_DEFINITION_TAG -> type_name}\n");
+		break;
+	}
+	default:
+	{
+		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokensArray);
+	}
 	}
 }
 
@@ -339,95 +339,108 @@ void parser_COMMAND()
 	fprintf(yyoutSyntax, "{COMMAND -> RECEIVER = EXPRESSION | when (EXPRESSION rel_op EXPRESSION) do COMMANDS; default COMMANDS; end_when | for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for | id = malloc(size_of(type_name)) | free(id) | BLOCK}\n");
 	currentToken = next_token();
 
+	tempDataItem = calloc(1, sizeof(DataItem));
+	tempDataItem->m_Data = (Data*)calloc(1, sizeof(Data));
+
 	switch ((*currentToken).kind)
 	{
 	case ID:
 	{
 		fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION | id = malloc(size_of(type_name))}\n");
+
+		DataItem* isFound = NULL;
+		tempDataItem->m_Data->name = currentToken->lexeme;
+		tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
+		isFound = checkIfIdExists(tempDataItem->m_Key);
+		if (isFound != NULL)
+		{
+			tempDataItem->m_Data->typeOfVariable = isFound->m_Data->typeOfVariable;
+			tempDataItem->m_Data->subType = isFound;
+		}
 		currentToken = next_token();
 		switch ((*currentToken).kind)
+		{
+		case ASSIGNMENT:
+		{
+			currentToken = next_token();
+			switch ((*currentToken).kind)
 			{
-			case ASSIGNMENT:
+			case KEYWORD_MALLOC:
 			{
-				currentToken = next_token();
-				switch ((*currentToken).kind)
-				{
-					case KEYWORD_MALLOC:
-					{
-						fprintf(yyoutSyntax, "{COMMAND -> id=malloc(sizeof(type_name))}\n");
-						if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
-						{
-							HandleMatchError(followArray, folowArraySize);
-							return;
-						}
-						if (match(KEYWORD_SIZE_OF) == 0)
-						{
-							HandleMatchError(followArray, folowArraySize);
-							return;
-						}
-						if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
-						{
-							HandleMatchError(followArray, folowArraySize);
-							return;
-						}
-						if (match(ID) == 0)
-						{
-							HandleMatchError(followArray, folowArraySize);
-							return;
-						}
-						if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
-						{
-							HandleMatchError(followArray, folowArraySize);
-							return;
-						}
-						if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
-						{
-							HandleMatchError(followArray, folowArraySize);
-							return;
-						}
-						break;
-					}
-					case REL_NUM:
-					case ID:
-					case INT_NUM:
-					case UNARY_OP_AMP:
-					case KEYWORD_SIZE_OF:
-					{
-						fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION}\n");
-						currentToken = back_token();
-						parser_EXPRESSION();
-						break;
-					}
-					default:
-					{
-						eTOKENS expectedTokens[] = { KEYWORD_MALLOC,REL_NUM,ID,INT_NUM,UNARY_OP_AMP,KEYWORD_SIZE_OF };
-						int sizeOfExpectedTokens = 6;
-						HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
-						break;
-					}
-				}
-				break;
-			}
-			case POINTER:
-			case SEPERATION_SIGN_BRACKET_OPEN:
-			{
-				currentToken = back_token();
-				parser_RECIVER_TAG();
-				if (match(ASSIGNMENT) == 0)
+				fprintf(yyoutSyntax, "{COMMAND -> id=malloc(sizeof(type_name))}\n");
+				if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
 				{
 					HandleMatchError(followArray, folowArraySize);
 					return;
 				}
+				if (match(KEYWORD_SIZE_OF) == 0)
+				{
+					HandleMatchError(followArray, folowArraySize);
+					return;
+				}
+				if (match(SEPERATION_SIGN_PARENT_OPEN) == 0)
+				{
+					HandleMatchError(followArray, folowArraySize);
+					return;
+				}
+				if (match(ID) == 0)
+				{
+					HandleMatchError(followArray, folowArraySize);
+					return;
+				}
+				if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
+				{
+					HandleMatchError(followArray, folowArraySize);
+					return;
+				}
+				if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
+				{
+					HandleMatchError(followArray, folowArraySize);
+					return;
+				}
+				break;
+			}
+			case REL_NUM:
+			case ID:
+			case INT_NUM:
+			case UNARY_OP_AMP:
+			case KEYWORD_SIZE_OF:
+			{
+				fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION}\n");
+				currentToken = back_token();
 				parser_EXPRESSION();
 				break;
 			}
 			default:
 			{
-				eTOKENS expectedTokens[] = { ASSIGNMENT,POINTER,SEPERATION_SIGN_BRACKET_OPEN };
-				int sizeOfExpectedTokens = 3;
+				eTOKENS expectedTokens[] = { KEYWORD_MALLOC,REL_NUM,ID,INT_NUM,UNARY_OP_AMP,KEYWORD_SIZE_OF };
+				int sizeOfExpectedTokens = 6;
 				HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
 				break;
 			}
+			}
+			break;
+		}
+		case POINTER:
+		case SEPERATION_SIGN_BRACKET_OPEN:
+		{
+			currentToken = back_token();
+			parser_RECIVER_TAG();
+			if (match(ASSIGNMENT) == 0)
+			{
+				HandleMatchError(followArray, folowArraySize);
+				return;
+			}
+			parser_EXPRESSION();
+			break;
+		}
+		default:
+		{
+			eTOKENS expectedTokens[] = { ASSIGNMENT,POINTER,SEPERATION_SIGN_BRACKET_OPEN };
+			int sizeOfExpectedTokens = 3;
+			HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
+			break;
+		}
 		}
 		break;
 	}
@@ -673,17 +686,360 @@ void parser_EXPRESSION()
 	{
 	case INT_NUM:
 	{
+		if (tempDataItem->m_Data->subType == NULL)
+		{
+			if (tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER))
+			{
+				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
+			}
+		}
+		else
+			if (tempDataItem->m_Data->subType->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER))
+			{
+				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
+			}
 		fprintf(yyoutSyntax, "{EXPRESSION -> INT_NUM}\n");
 		break;
 	}
 	case REL_NUM:
 	{
+		if (tempDataItem->m_Data->subType == NULL)
+		{
+			if (tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+			{
+				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
+			}
+		}
+		else
+			if (tempDataItem->m_Data->subType->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+			{
+				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
+			}
 		fprintf(yyoutSyntax, "{EXPRESSION -> REL_NUM}\n");
 		break;
 	}
 	case ID:
 	{
+		int key = StringToIntHash(currentToken->lexeme);
+		DataItem* tempSecondVar = searchInsideHashTableIfTheSubTypeExist(key);
+		DataItem* SubTypeOfFirstVar = tempDataItem->m_Data->subType;
+		DataItem* SubTypeOfSecondVar = tempSecondVar->m_Data->subType;
+		/* check what to use
+		int key = StringToIntHash(isFound->m_Data->name);
+		DataItem* subTypeDataItem = searchInsideHashTableIfTheSubTypeExist(key);
+		change the if , if its not working
+*/
+		if (tempSecondVar != NULL)
+		{
+			if (tempDataItem->m_Data->role == Variable)
+			{
+				if (tempSecondVar->m_Data->role == Variable)
+				{
+					if (tempDataItem->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+					{
+						if (tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+						{
+							if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+							{
+								if (SubTypeOfFirstVar->m_Data->typeOfVariable != SubTypeOfSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+							else
+							{
+								if (SubTypeOfFirstVar->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+						}
+						else
+						{
+							if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+							{
+								if (tempDataItem->m_Data->typeOfVariable != SubTypeOfSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+							else
+							{
+								if (tempDataItem->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+						}
+						
+					}
+				}
+				else
+				{
+					if (tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+					{
+						if (tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_REAL))
+						{
+							DataItem* ChildOfSecondSubptrType = SubTypeOfSecondVar->m_Data->subType;
+							if (ChildOfSecondSubptrType->m_Data->typeOfVariable != SubTypeOfFirstVar->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+							}
+						}
+						else
+						{
+							if (SubTypeOfFirstVar->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+							}
+						}
+					}
+					else
+					{
+						if (tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_REAL))
+						{
+							DataItem* ChildOfSecondSubptrType = SubTypeOfSecondVar->m_Data->subType;
+							if (ChildOfSecondSubptrType->m_Data->typeOfVariable != tempDataItem->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+							}
+						}
+						else
+						{
+							if (tempDataItem->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+							}
+						}
+					}
+				}
+			}
+			else
+			{
+				if (tempSecondVar->m_Data->role == Variable)
+				{
+					if (SubTypeOfFirstVar->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+					{
+						if (SubTypeOfFirstVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && SubTypeOfFirstVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+						{
+							DataItem* ChildOfSubTypeOfFirstVar = SubTypeOfFirstVar->m_Data->subType;
+							if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+							{
+								if (ChildOfSubTypeOfFirstVar->m_Data->typeOfVariable != SubTypeOfSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+							else
+							{
+								if (ChildOfSubTypeOfFirstVar->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+						}
+						else
+						{
+							if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+							{
+								if (SubTypeOfFirstVar->m_Data->typeOfVariable != SubTypeOfSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+							else
+							{
+								if (SubTypeOfFirstVar->m_Data->typeOfVariable != tempSecondVar->m_Data->typeOfVariable)
+								{
+									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->typeOfVariable);
+								}
+							}
+						}
+
+					}
+				}
+				else
+				{
+					if (SubTypeOfFirstVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER) && SubTypeOfFirstVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+					{
+						DataItem* ChildOfFirstSubptrType = SubTypeOfFirstVar->m_Data->subType;
+						if (tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_REAL))
+						{
+							DataItem* ChildOfSecondSubptrType = SubTypeOfSecondVar->m_Data->subType;
+							if (ChildOfSecondSubptrType->m_Data->typeOfVariable != ChildOfFirstSubptrType->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->basicSubTypeName);
+							}
+						}
+						else
+						{
+							if (ChildOfFirstSubptrType->m_Data->typeOfVariable != SubTypeOfSecondVar->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->basicSubTypeName);
+							}
+						}
+					}
+					else
+					{
+						if (tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_INTEGER) && tempSecondVar->m_Data->basicSubTypeName != stringFromeTOKENS(KEYWORD_REAL))
+						{
+							DataItem* ChildOfSecondSubptrType = SubTypeOfSecondVar->m_Data->subType;
+							if (ChildOfSecondSubptrType->m_Data->typeOfVariable != SubTypeOfFirstVar->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->basicSubTypeName);
+							}
+						}
+						else
+						{
+							if (SubTypeOfFirstVar->m_Data->typeOfVariable != SubTypeOfSecondVar->m_Data->typeOfVariable)
+							{
+								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName, tempSecondVar->m_Data->basicSubTypeName);
+							}
+						}
+					}
+				}
+			}
+		}
+		else
+		{
+			printTypeNotDefined(currentToken->lineNumber, currentToken->lexeme);
+		}
+
+
+
+
+
+
+
+		//
+		//if (tempSecondVar != NULL)
+		//{
+		//	if (tempDataItem->m_Data->role == Variable)
+		//	{
+		//		if (tempSecondVar->m_Data->role == Variable)
+		//		{
+		//			if (tempDataItem->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_INTEGER))
+		//			{
+		//				if (tempSecondVar->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_REAL))
+		//				{
+		//					printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+		//				}
+		//				else if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER))
+		//				{
+
+		//					if (tempSecondVar->m_Data->subType->typeOfVariable != tempDataItem->m_Data->typeOfVariable)
+		//					{
+		//						printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+
+		//					}
+		//				}
+		//			}
+		//			else
+		//				if (tempDataItem->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_REAL))
+		//				{
+		//					if (tempSecondVar->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_INTEGER))
+		//					{
+		//						printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+		//					}
+		//					else if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+		//					{
+		//						/*
+		//						int key = StringToIntHash(isFound->m_Data->name);
+		//						DataItem* subTypeDataItem = searchInsideHashTableIfTheSubTypeExist(key);
+		//						change the if , if its not working
+		//						*/
+
+		//						if (tempSecondVar->m_Data->subType->typeOfVariable != tempDataItem->m_Data->typeOfVariable)
+		//						{
+		//							printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+		//						}
+		//					}
+		//				}
+		//				else
+		//				{
+		//					/*
+		//					int key = StringToIntHash(tempDataItem->m_Data->name);
+		//					DataItem* subTypeDataItem = searchInsideHashTableIfTheSubTypeExist(key);
+		//					change the if , if its not working
+		//					*/
+		//					DataItem* subTypeDataItem = tempDataItem->m_Data->subType->typeOfVariable;
+		//					if (subTypeDataItem->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_INTEGER))
+		//					{
+		//						if (tempSecondVar->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_REAL))
+		//						{
+		//							printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+		//						}
+		//						else if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER))
+		//						{
+		//							/*
+		//							int key = StringToIntHash(isFound->m_Data->name);
+		//							DataItem* subTypeDataItem = searchInsideHashTableIfTheSubTypeExist(key);
+		//							change the if , if its not working
+		//							*/
+		//							if (tempSecondVar->m_Data->subType->typeOfVariable != subTypeDataItem->m_Data->typeOfVariable)
+		//							{
+		//								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+
+		//							}
+		//						}
+		//					}
+		//					else
+		//						if (subTypeDataItem->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_REAL))
+		//						{
+		//							if (tempSecondVar->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_INTEGER))
+		//							{
+		//								printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+		//							}
+		//							else if (tempSecondVar->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
+		//							{
+		//								/*
+		//								int key = StringToIntHash(isFound->m_Data->name);
+		//								DataItem* subTypeDataItem = searchInsideHashTableIfTheSubTypeExist(key);
+		//								change the if , if its not working
+		//								*/
+		//								if (tempSecondVar->m_Data->subType->typeOfVariable != subTypeDataItem->m_Data->typeOfVariable)
+		//								{
+		//									printDiffrentTypes(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, tempSecondVar->m_Data->typeOfVariable);
+
+		//								}
+		//							}
+		//						}
+		//				}
+		//		}
+		//		if (tempSecondVar->m_Data->role == UserDefinedType)
+		//		{
+		//			if (tempDataItem->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_INTEGER))
+		//			{
+		//				if (SubTypeOfSecondVar->m_Data->typeOfVariable == stringFromeTOKENS(KEYWORD_INTEGER))
+		//				{
+
+		//				}
+
+
+
+
+
+		//			}
+
+
+
+
+		//		}
+		//	}
+		//	if (tempDataItem->m_Data->role == UserDefinedType)
+		//	{
+
+		//	}
+		//}
+		//else
+		//{
+		//	
+		//	printTypeNotDefined(currentToken->lineNumber, currentToken->lexeme);
+		//}
+		
 		fprintf(yyoutSyntax, "{EXPRESSION -> id EXPRESSION_TAG}\n");
+		
+		tempDataItem = tempSecondVar;
 		parser_EXPRESSION_TAG();
 		break;
 	}
@@ -912,12 +1268,13 @@ void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, 
 	currentToken = back_token();
 }
 
+
 void insterToHashTableIfIdIsValid()
 {
 	char* currentTypeOfVariable = NULL;
 	if (tempDataItem->m_Data->role == Variable)
 	{
-		 currentTypeOfVariable = tempDataItem->m_Data->typeOfVariable;
+		currentTypeOfVariable = tempDataItem->m_Data->typeOfVariable;
 	}
 	else
 	{
@@ -925,7 +1282,7 @@ void insterToHashTableIfIdIsValid()
 	}
 	char* integerType = stringFromeTOKENS(KEYWORD_INTEGER);
 	char* realType = stringFromeTOKENS(KEYWORD_REAL);
-	int insertCurrentTokenToHashTable=1;
+	DataItem* insertCurrentTokenToHashTable;
 	HashTable* tempHashTable = top(stack);
 	DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, tempDataItem->m_Key);
 	if (currentDataItem != NULL)
@@ -935,33 +1292,63 @@ void insterToHashTableIfIdIsValid()
 	}
 	if (((strcmp((currentTypeOfVariable), integerType) != 0) && (strcmp((currentTypeOfVariable), realType) != 0)))
 	{
-		insertCurrentTokenToHashTable = searchInsideHashTableIfTheSubTypeExist();
-		if (insertCurrentTokenToHashTable == 0)
+		insertCurrentTokenToHashTable = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(tempDataItem->m_Data->basicSubTypeName));
+		tempDataItem->m_Data->subType = insertCurrentTokenToHashTable;
+		if (insertCurrentTokenToHashTable == NULL)
 		{
 			//ERROR THERE IS NO SUB TYPE INSIDE ALL THE BLOCK
 		}
+		else
+		{
+			insert(top(stack), tempDataItem);
+		}
 	}
-	if (insertCurrentTokenToHashTable == 1)
+	else
 	{
 		insert(top(stack), tempDataItem);
 	}
 }
 
-int searchInsideHashTableIfTheSubTypeExist()
+DataItem* searchInsideHashTableIfTheSubTypeExist(int i_Key)
 {
 	int isIdExsitsInAllHashTables = 0;
+	DataItem* currentDataItem = NULL;
 	StackOfHashTables* tempStack = createStack();
-	while (!isEmpty(stack) && isIdExsitsInAllHashTables==0)
+	while (!isEmpty(stack) && isIdExsitsInAllHashTables == 0)
 	{
 		HashTable* tempHashTable = pop(stack);
-		DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, StringToIntHash(tempDataItem->m_Data->basicSubTypeName));
+		currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, i_Key);
 		if (currentDataItem != NULL)
 		{
 			isIdExsitsInAllHashTables = 1;
-			tempDataItem->m_Data->subType = currentDataItem;
+			//tempDataItem->m_Data->subType = currentDataItem;
 		}
 		push(tempStack, tempHashTable);
 	}
 	pushAllItemFromFirstStackToSecondStack(tempStack, stack);
-	return isIdExsitsInAllHashTables;
+	return currentDataItem;
 }
+
+DataItem* checkIfIdExists(int i_Key)
+{
+	HashTable* tempHashTable = top(stack);
+	DataItem* isFound;
+	isFound = searchInsideHashTableIfTheSubTypeExist(i_Key);
+	if (isFound == NULL)
+	{
+		printTypeNotDefined(currentToken->lineNumber, currentToken->lexeme);
+	}
+	return isFound;
+}
+
+
+void printTypeNotDefined(int i_Line, char* i_Lexeme)
+{
+	fprintf(yyoutSyntax, "(Line %d) Type %s not Defined %s.\n", i_Line, i_Lexeme);
+}
+
+void printDiffrentTypes(int i_Line, char* i_TypeFirst, char* i_TypeSecond)
+{
+	fprintf(yyoutSyntax, "(Line %d) Inconsistency of types in assignment: left side is of type %s, while right side is of type %s.\n", i_Line, i_Line, i_TypeFirst, i_TypeSecond);
+}
+
