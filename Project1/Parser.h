@@ -6,7 +6,6 @@
 #include "HashTable.h"
 extern FILE *yyoutSyntax;
 int match(eTOKENS);
-void REL_OP_CASES(Token *currentToken);
 int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr, int followArrsize);
 void parser_PROGRAM();
 void parser_BLOCK();
@@ -28,6 +27,8 @@ void printErrorToTheFile(char* i_ExcepectedToken, int i_LineNumber, char* i_Actu
 void insterToHashTableIfIdIsValid();
 DataItem* checkIfIdExists(int i_Key);
 void printTypeNotDefined(int i_Line, char* i_Lexeme);
+void handleWithVariableType();
+void handleWithUserDefinedType();
 DataItem* searchInsideHashTableIfTheSubTypeExist(int i_Key);
 void printDiffrentTypes(int i_Line, char* i_TypeFirst, char* i_TypeSecond);
 #endif

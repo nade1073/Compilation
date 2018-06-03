@@ -1268,38 +1268,81 @@ void HandlingErrors(Token* currentToken, eTOKENS *followArr, int followArrSize, 
 	currentToken = back_token();
 }
 
-
 void insterToHashTableIfIdIsValid()
 {
 	char* currentTypeOfVariable = NULL;
 	if (tempDataItem->m_Data->role == Variable)
 	{
-		currentTypeOfVariable = tempDataItem->m_Data->typeOfVariable;
+		handleWithVariableType();
+
 	}
 	else
 	{
-		currentTypeOfVariable = tempDataItem->m_Data->basicSubTypeName;
+		handleWithUserDefinedType();
 	}
+}
+
+void handleWithVariableType()
+{
+	char* currentTypeOfVariable = tempDataItem->m_Data->typeOfVariable;
 	char* integerType = stringFromeTOKENS(KEYWORD_INTEGER);
 	char* realType = stringFromeTOKENS(KEYWORD_REAL);
-	DataItem* insertCurrentTokenToHashTable;
+	DataItem* dataItemThatReturnFromTheHashtable;
 	HashTable* tempHashTable = top(stack);
 	DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, tempDataItem->m_Key);
+	/////Here handle on the id in the same scope
 	if (currentDataItem != NULL)
 	{
 		//PRINT EROR ID - THERE IS SAME ID IN THIS SCOPE
 		return;
 	}
+	//IF WE ARE POINTER OR ARRAY 
 	if (((strcmp((currentTypeOfVariable), integerType) != 0) && (strcmp((currentTypeOfVariable), realType) != 0)))
 	{
-		insertCurrentTokenToHashTable = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(tempDataItem->m_Data->basicSubTypeName));
-		tempDataItem->m_Data->subType = insertCurrentTokenToHashTable;
-		if (insertCurrentTokenToHashTable == NULL)
+		dataItemThatReturnFromTheHashtable = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(tempDataItem->m_Data->typeOfVariable));
+		if (dataItemThatReturnFromTheHashtable == NULL || dataItemThatReturnFromTheHashtable->m_Data->role == Variable)
 		{
 			//ERROR THERE IS NO SUB TYPE INSIDE ALL THE BLOCK
 		}
 		else
 		{
+			tempDataItem->m_Data->subType = dataItemThatReturnFromTheHashtable;
+			insert(top(stack), tempDataItem);
+		}
+	}
+	else
+	{
+		insert(top(stack), tempDataItem);
+	}
+
+}
+
+void handleWithUserDefinedType()
+{
+	char* currentTypeOfVariable = tempDataItem->m_Data->basicSubTypeName;
+	char* integerType = stringFromeTOKENS(KEYWORD_INTEGER);
+	char* realType = stringFromeTOKENS(KEYWORD_REAL);
+	DataItem* dataItemThatReturnFromTheHashtable;
+	HashTable* tempHashTable = top(stack);
+	DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, tempDataItem->m_Key);
+	/////Here handle on the id in the same scope
+	if (currentDataItem != NULL)
+	{
+		//PRINT EROR ID - THERE IS SAME ID IN THIS SCOPE
+		return;
+	}
+	//IF WE ARE POINTER OR ARRAY 
+	if (((strcmp((currentTypeOfVariable), integerType) != 0) && (strcmp((currentTypeOfVariable), realType) != 0)))
+	{
+		dataItemThatReturnFromTheHashtable = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(tempDataItem->m_Data->basicSubTypeName));
+	
+		if (dataItemThatReturnFromTheHashtable == NULL || dataItemThatReturnFromTheHashtable->m_Data->role!= UserDefinedType)
+		{
+			//ERROR THERE IS NO SUB TYPE INSIDE ALL THE BLOCK
+		}
+		else
+		{
+			tempDataItem->m_Data->subType = dataItemThatReturnFromTheHashtable;
 			insert(top(stack), tempDataItem);
 		}
 	}
@@ -1340,7 +1383,6 @@ DataItem* checkIfIdExists(int i_Key)
 	}
 	return isFound;
 }
-
 
 void printTypeNotDefined(int i_Line, char* i_Lexeme)
 {

@@ -2,8 +2,6 @@
 
 #define SIZE 5000
 
-
-
 int hashCode(int i_Size,int i_Key)
 {
 	return i_Key%i_Size;
@@ -57,6 +55,7 @@ void insert(HashTable* i_CurrentHashTable, DataItem* i_Data)
 	currentDataItem->m_Data->role = i_Data->m_Data->role;
 	currentDataItem->m_Data->sizeOfArray = i_Data->m_Data->sizeOfArray;
 	currentDataItem->m_Data->subType = i_Data->m_Data->subType;
+	currentDataItem->m_Data->basicSubTypeName = i_Data->m_Data->basicSubTypeName;
 	currentDataItem->m_Data->typeOfVariable = i_Data->m_Data->typeOfVariable;
 }
 
