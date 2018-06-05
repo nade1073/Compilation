@@ -32,4 +32,5 @@ void handleWithUserDefinedType();
 DataItem* searchInsideHashTableIfTheSubTypeExist(int i_Key);
 void printDiffrentTypes(int i_Line, char* i_TypeFirst, char* i_TypeSecond);
 void assignCurrentTokenToCommands();
+void commandsHandlerType();
 #endif
