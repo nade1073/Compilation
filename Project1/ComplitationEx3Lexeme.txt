@@ -77,20 +77,21 @@ REL_NUM (0.{DIGIT}+)|([1-9]{DIGIT}*.{DIGIT}+)
 <<EOF>>		{create_and_store_token(END_OF_FILE, lineNumber, yytext);return 1;}
 %%
 void executeFileOfPhaseOne(char*, char*);
-void executeFileOfPhaseTwo(char*, char*);
+void executeFileOfPhaseTwoAndThree(char*, char*,char*);
 void main()
 {
 	executeFileOfPhaseOne("C:\\temp\\test1.txt", "C:\\temp\\test1_204233456_308548569_lex.txt");
 	resetVarsAndList();
-	executeFileOfPhaseTwo("C:\\temp\\test1.txt","C:\\temp\\test1_204233456_308548569_syntactic.txt");
+	executeFileOfPhaseTwoAndThree("C:\\temp\\test1.txt","C:\\temp\\test1_204233456_308548569_syntactic.txt","C:\\temp\\test1_204233456_308548569_semantic.txt");
 	resetVarsAndList();
 	executeFileOfPhaseOne("C:\\temp\\test2.txt", "C:\\temp\\test2_204233456_308548569_lex.txt");
 	resetVarsAndList();
-	executeFileOfPhaseTwo("C:\\temp\\test2.txt","C:\\temp\\test2_204233456_308548569_syntactic.txt");
+	executeFileOfPhaseTwoAndThree("C:\\temp\\test2.txt","C:\\temp\\test2_204233456_308548569_syntactic.txt","C:\\temp\\test2_204233456_308548569_semantic.txt");
+
 }
 
 
-void executeFileOfPhaseTwo(char *inputFile, char *outputFile)
+void executeFileOfPhaseTwoAndThree(char *inputFile, char *outputFileSyntactic,char* outputFileSenmantic)
 {
 		lineNumber=1;
 		Token* currentToken=NULL;
@@ -101,11 +102,18 @@ void executeFileOfPhaseTwo(char *inputFile, char *outputFile)
 			printf("No input file was found\n");
 			return;
 		}
-		printf("Trying to open Syntax output file '%s': \n",outputFile);
-		yyoutSyntax = fopen(outputFile,"w");
+		printf("Trying to open Syntax output file '%s': \n",outputFileSyntactic);
+		yyoutSyntax = fopen(outputFileSyntactic,"w");
 		if (!yyoutSyntax)
 		{
 			printf("No output Syntax file was found \n");
+			return;
+		}
+		printf("Trying to open Syntax output file '%s': \n",outputFileSenmantic);
+		yyoutSemantic = fopen(outputFileSenmantic,"w");
+		if (!yyoutSyntax)
+		{
+			printf("No output Semantic file was found \n");
 			return;
 		}
 		parser_PROGRAM();
@@ -114,6 +122,8 @@ void executeFileOfPhaseTwo(char *inputFile, char *outputFile)
 		fclose(yyin);
 		printf("Closing syntax output file \n");
 		fclose(yyoutSyntax);
+		printf("Closing Semantic output file \n");
+		fclose(yyoutSemantic);
 		
 }
 

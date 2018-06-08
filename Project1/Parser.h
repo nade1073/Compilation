@@ -5,6 +5,7 @@
 #include "Token.h"
 #include "HashTable.h"
 extern FILE *yyoutSyntax;
+extern FILE *yyoutSemantic;
 int match(eTOKENS);
 int CheckIfTokenInFollowArr(Token* currentToken, eTOKENS *followArr, int followArrsize);
 void parser_PROGRAM();
@@ -33,4 +34,9 @@ DataItem* searchInsideHashTableIfTheSubTypeExist(int i_Key);
 void printDiffrentTypes(int i_Line, char* i_TypeFirst, char* i_TypeSecond);
 void assignCurrentTokenToCommands();
 void commandsHandlerType();
+void printExpectedTypeOrVar(Token i_CurrentToken, eRoleTypes i_UnexpectedCurrentRole);
+void printErrorAssignVaribleToPointer(Token i_CurrentToken);
+void printErrorVaiableWrongType(Token i_CurrentToken, eCategoryOfType i_UnexpectedCategory);
+void printErrorOfPointerAfterVariableInTheRightSide(Token i_CurrentToken);
+
 #endif
