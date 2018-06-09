@@ -980,7 +980,7 @@ void insterToHashTableIfIdIsValid()
 		handleWithUserDefinedType();
 	}
 }
-
+// variable that is Variable  Type check if its Define correctly and insert to the table if it does
 void handleWithVariableType()
 {
 	char* currentTypeOfVariable = tempDataItem->m_Data->typeOfVariable;
@@ -1017,7 +1017,7 @@ void handleWithVariableType()
 	}
 
 }
-
+// variable that is User Defined Type check if its Define correctly and insert to the table if it does
 void handleWithUserDefinedType()
 {
 	char* currentTypeOfVariable = tempDataItem->m_Data->basicSubTypeName;
@@ -1055,7 +1055,7 @@ void handleWithUserDefinedType()
 		insert(top(stack), tempDataItem);
 	}
 }
-
+// Search in the HashTable if the variable exists in all the scopes
 DataItem* searchInsideHashTableIfTheSubTypeExist(int i_Key)
 {
 	int isIdExsitsInAllHashTables = 0;
@@ -1087,6 +1087,7 @@ DataItem* checkIfIdExists(int i_Key)
 	return isFound;
 }
 
+// Assign Current Token (in Commands) To Array of Tokens to handle the commands correctly
 void assignCurrentTokenToCommands()
 {
 	currentCommandLine = realloc(currentCommandLine, (++sizeOfTokensInCommandLine)*sizeof(Token));
@@ -1094,6 +1095,8 @@ void assignCurrentTokenToCommands()
 	currentCommandLine[sizeOfTokensInCommandLine - 1].kind = currentToken->kind;
 	currentCommandLine[sizeOfTokensInCommandLine - 1].lineNumber = currentToken->lineNumber;
 }
+
+// Assign Semi Colon to the end of When(Expression) to the array of tokens to handle the commands correctly
 void assignInWhenSemiColon()
 {
 	currentCommandLine = realloc(currentCommandLine, (++sizeOfTokensInCommandLine) * sizeof(Token));
@@ -1101,6 +1104,7 @@ void assignInWhenSemiColon()
 	currentCommandLine[sizeOfTokensInCommandLine - 1].kind = SEPERATION_SIGN_SEMICOLON;
 	currentCommandLine[sizeOfTokensInCommandLine - 1].lineNumber = currentToken->lineNumber;
 }
+// Handle Each command seperatly and print errors when neccesary
 void commandsHandlerType()
 {
 	DataItem* currentItem=NULL;
@@ -1715,7 +1719,7 @@ void duplicateIdInTheSameScope(char* i_NameOfDuplicatedDecleration, int i_LineNu
 {
 	fprintf(yyoutSemantic, "(Line %d) duplicated declaration of %s\n", i_LineNumber, i_NameOfDuplicatedDecleration);
 }
-
+// handle id++ in the for(i=0;i<=Variable;i++)
 void commandsHandlerTypeOfUnrayOpIncrement()
 {
 	DataItem* currentItem = NULL;
