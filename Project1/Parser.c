@@ -1312,18 +1312,11 @@ void commandsHandlerType()
 											printErrorAssignVaribleToPointer(currentCommandLine[indexArray]);
 											return;
 										}
-										if (strcmp(currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName) != 0)
+										else if (strcmp(currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName) != 0)
 										{
 											printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName);
 											return;
 										}
-										/*
-										if (strcmp(currentItem->m_Data->typeOfVariable, typeVariable) != 0)
-										{
-											printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentItem->m_Data->typeOfVariable, typeVariable);
-											return;
-										}
-										*/
 									}
 									else
 									{
@@ -1631,7 +1624,7 @@ int handleWithSizeOfKeywordInsideTheKeywordMalloc(int i_IndexInsideSizeofKeyword
 	}
 	if (strcmp(currentItem->m_Data->name, i_CurrentType) != 0)
 	{
-		printDiffrentTypes(currentCommandLine[i_IndexInsideSizeofKeyword].lineNumber, currentItem->m_Data->basicSubTypeName, i_CurrentType);
+		printDiffrentTypes(currentCommandLine[i_IndexInsideSizeofKeyword].lineNumber, currentItem->m_Data->name, i_CurrentType);
 		return -1;
 	}
 	return i_IndexInsideSizeofKeyword;
