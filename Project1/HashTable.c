@@ -4,7 +4,19 @@
 
 int hashCode(int i_Size,int i_Key)
 {
-	return i_Key%i_Size;
+	//return i_Key%i_Size;
+	if (i_Key < 0)
+	{
+		while (i_Key < 0)
+		{
+			i_Key += i_Size;
+		}
+	}
+	else
+	{
+		return i_Key%i_Size;
+	}
+	return i_Key;
 }
 
 HashTable* createHashTable()

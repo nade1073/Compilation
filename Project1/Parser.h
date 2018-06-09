@@ -37,6 +37,13 @@ void commandsHandlerType();
 void printExpectedTypeOrVar(Token i_CurrentToken, eRoleTypes i_UnexpectedCurrentRole);
 void printErrorAssignVaribleToPointer(Token i_CurrentToken);
 void printErrorVaiableWrongType(Token i_CurrentToken, eCategoryOfType i_UnexpectedCategory);
-void printErrorOfPointerAfterVariableInTheRightSide(Token i_CurrentToken);
+void printErrorOfPointerAfterVariable(Token i_CurrentToken);
+void printVarNotDefined(int i_Line, char* i_Lexeme);
+void printErrorOfArrayAfterVariable(Token i_CurrentToken);
+void indexArayIsNotIntger(Token i_CurrentToken);
+void printErrorOfPtrInsideFree(Token i_CurrentToken);
+void duplicateIdInTheSameScope(char*, int);
+void commandsHandlerTypeOfUnrayOpIncrement();
+void assignInWhenSemiColon();
 
 #endif

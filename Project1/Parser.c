@@ -84,7 +84,6 @@ void parser_DEFINITION()
 	{
 	case ID:
 	{
-
 		tempDataItem->m_Data->name = currentToken->lexeme;
 		tempDataItem->m_Data->role = Variable;
 		tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
@@ -135,7 +134,7 @@ void parser_DEFINITIONS_TAG()
 		HandleMatchError(followArray, followArraySize);
 		return;
 	}
-	if (tempDataItem != NULL) //ERROR HANDLER NEED TO NULL THE POINTER
+	if (tempDataItem != NULL) 
 	{
 		insterToHashTableIfIdIsValid();
 	}
@@ -342,26 +341,12 @@ void parser_COMMAND()
 	fprintf(yyoutSyntax, "{COMMAND -> RECEIVER = EXPRESSION | when (EXPRESSION rel_op EXPRESSION) do COMMANDS; default COMMANDS; end_when | for (id = EXPRESSION; id rel_op EXPRESSION; id++) COMMANDS; end_for | id = malloc(size_of(type_name)) | free(id) | BLOCK}\n");
 	currentToken = next_token();
 
-	//tempDataItem = calloc(1, sizeof(DataItem));
-	//tempDataItem->m_Data = (Data*)calloc(1, sizeof(Data));
 	switch ((*currentToken).kind)
 	{
 	case ID:
 	{
 		fprintf(yyoutSyntax, "{COMMAND -> id = EXPRESSION | id = malloc(size_of(type_name))}\n");
 		assignCurrentTokenToCommands();
-
-		/*
-		DataItem* isFound = NULL;
-		tempDataItem->m_Data->name = currentToken->lexeme;
-		tempDataItem->m_Key = StringToIntHash(tempDataItem->m_Data->name);
-		isFound = checkIfIdExists(tempDataItem->m_Key);
-		if (isFound != NULL)
-		{
-			tempDataItem->m_Data->typeOfVariable = isFound->m_Data->typeOfVariable;
-			tempDataItem->m_Data->subType = isFound;
-		}
-		*/
 		currentToken = next_token();
 		switch ((*currentToken).kind)
 		{
@@ -490,6 +475,9 @@ void parser_COMMAND()
 			HandleMatchError(followArray, folowArraySize);
 			return;
 		}
+		assignInWhenSemiColon();
+		commandsHandlerType();
+		sizeOfTokensInCommandLine = 0;
 		if (match(KEYWORD_DO) == 0)
 		{
 			HandleMatchError(followArray, folowArraySize);
@@ -532,6 +520,7 @@ void parser_COMMAND()
 			HandleMatchError(followArray, folowArraySize);
 			return;
 		}
+		assignCurrentTokenToCommands();
 		if (match(ASSIGNMENT) == 0)
 		{
 			HandleMatchError(followArray, folowArraySize);
@@ -543,11 +532,15 @@ void parser_COMMAND()
 			HandleMatchError(followArray, folowArraySize);
 			return;
 		}
+		assignCurrentTokenToCommands();
+		commandsHandlerType();
+		sizeOfTokensInCommandLine = 0;
 		if (match(ID) == 0)
 		{
 			HandleMatchError(followArray, folowArraySize);
 			return;
 		}
+		assignCurrentTokenToCommands();
 		currentToken = next_token();
 		if (((*currentToken).kind == REL_OP_LESS) || (*currentToken).kind == REL_OP_EQUAL_OR_LESS || (*currentToken).kind == REL_OP_EQUAL || (*currentToken).kind == REL_OP_NOT_EQUAL || (*currentToken).kind == REL_OP_GREATER || (*currentToken).kind == REL_OP_EQUAL_OR_GREATER)
 		{
@@ -573,16 +566,22 @@ void parser_COMMAND()
 			HandleMatchError(followArray, folowArraySize);
 			return;
 		}
+		assignCurrentTokenToCommands();
+		commandsHandlerType();
+		sizeOfTokensInCommandLine = 0;
 		if (match(ID) == 0)
 		{
 			HandleMatchError(followArray, folowArraySize);
 			return;
 		}
+		assignCurrentTokenToCommands();
 		if (match(UNARY_OP_INCREMENT) == 0)
 		{
 			HandleMatchError(followArray, folowArraySize);
 			return;
 		}
+		commandsHandlerTypeOfUnrayOpIncrement();
+		sizeOfTokensInCommandLine = 0;
 		if (match(SEPERATION_SIGN_PARENT_CLOSE) == 0)
 		{
 			HandleMatchError(followArray, folowArraySize);
@@ -616,7 +615,7 @@ void parser_COMMAND()
 			return;
 		}
 		assignCurrentTokenToCommands();
-		if (match(SEPERATION_SIGN_PARENT_CLOSE))
+		if (match(SEPERATION_SIGN_PARENT_CLOSE)==0)
 		{
 			HandleMatchError(followArray, folowArraySize);
 			return;
@@ -632,7 +631,7 @@ void parser_COMMAND()
 	}
 	default:
 	{
-		eTOKENS *expectedTokens[] = { ID,KEYWORD_WHEN, KEYWORD_FOR,KEYWORD_FREE,KEYWORD_BLOCK };
+		eTOKENS expectedTokens[] = { ID,KEYWORD_WHEN, KEYWORD_FOR,KEYWORD_FREE,KEYWORD_BLOCK };
 		int sizeOfExpectedTokens = 5;
 		HandlingErrors(currentToken, followArray, folowArraySize, expectedTokens, sizeOfExpectedTokens);
 	}
@@ -710,40 +709,13 @@ void parser_EXPRESSION()
 	{
 	case INT_NUM:
 	{
-		/*
-		if (tempDataItem->m_Data->subType == NULL)
-		{
-			if (tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER))
-			{
-				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
-			}
-		}
-		else
-			if (tempDataItem->m_Data->subType->typeOfVariable != stringFromeTOKENS(KEYWORD_INTEGER))
-			{
-				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
-			}
-		*/
 		assignCurrentTokenToCommands();
 		fprintf(yyoutSyntax, "{EXPRESSION -> INT_NUM}\n");
 		break;
 	}
 	case REL_NUM:
 	{
-		/*
-		if (tempDataItem->m_Data->subType == NULL)
-		{
-			if (tempDataItem->m_Data->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
-			{
-				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
-			}
-		}
-		else
-			if (tempDataItem->m_Data->subType->typeOfVariable != stringFromeTOKENS(KEYWORD_REAL))
-			{
-				printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable, currentToken->lexeme);
-			}
-			*/
+
 		assignCurrentTokenToCommands();
 		fprintf(yyoutSyntax, "{EXPRESSION -> REL_NUM}\n");
 		break;
@@ -807,6 +779,7 @@ void parser_EXPRESSION_TAG()
 	{
 	case SEPERATION_SIGN_BRACKET_OPEN:
 	{
+		assignCurrentTokenToCommands();
 		fprintf(yyoutSyntax, "{EXPRESSION_TAG -> [EXPRESSION]}\n");
 		parser_EXPRESSION();
 		if (match(SEPERATION_SIGN_BRACKET_CLOSE) == 0)
@@ -814,6 +787,7 @@ void parser_EXPRESSION_TAG()
 			HandleMatchError(followArray, followArraySize);
 			return;
 		}
+		assignCurrentTokenToCommands();
 		break;
 	}
 	case POINTER:
@@ -1015,19 +989,21 @@ void handleWithVariableType()
 	DataItem* dataItemThatReturnFromTheHashtable;
 	HashTable* tempHashTable = top(stack);
 	DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, tempDataItem->m_Key);
-	/////Here handle on the id in the same scope
 	if (currentDataItem != NULL)
 	{
-		//PRINT EROR ID - THERE IS SAME ID IN THIS SCOPE
+		duplicateIdInTheSameScope(currentDataItem->m_Data->name, currentToken->lineNumber);
 		return;
 	}
-	//IF WE ARE POINTER OR ARRAY 
 	if (((strcmp((currentTypeOfVariable), integerType) != 0) && (strcmp((currentTypeOfVariable), realType) != 0)))
 	{
 		dataItemThatReturnFromTheHashtable = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(tempDataItem->m_Data->typeOfVariable));
-		if (dataItemThatReturnFromTheHashtable == NULL || dataItemThatReturnFromTheHashtable->m_Data->role == Variable)
+		if (dataItemThatReturnFromTheHashtable == NULL )
 		{
-			//ERROR THERE IS NO SUB TYPE INSIDE ALL THE BLOCK
+			printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->typeOfVariable);
+		}
+		else if (dataItemThatReturnFromTheHashtable->m_Data->role == Variable)
+		{
+			fprintf(yyoutSemantic, "(Line %d) Unexpected Variable, Lexeme : %s\n", currentToken->lineNumber, dataItemThatReturnFromTheHashtable->m_Data->name);
 		}
 		else
 		{
@@ -1050,24 +1026,27 @@ void handleWithUserDefinedType()
 	DataItem* dataItemThatReturnFromTheHashtable;
 	HashTable* tempHashTable = top(stack);
 	DataItem* currentDataItem = searchInsideHashTableAndReturnItem(tempHashTable, tempDataItem->m_Key);
-	/////Here handle on the id in the same scope
 	if (currentDataItem != NULL)
-	{
-		//PRINT EROR ID - THERE IS SAME ID IN THIS SCOPE
+	{	
+		duplicateIdInTheSameScope(currentDataItem->m_Data->name, currentToken->lineNumber);
 		return;
 	}
-	//IF WE ARE POINTER OR ARRAY 
 	if (((strcmp((currentTypeOfVariable), integerType) != 0) && (strcmp((currentTypeOfVariable), realType) != 0)))
 	{
 		dataItemThatReturnFromTheHashtable = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(tempDataItem->m_Data->basicSubTypeName));
 	
-		if (dataItemThatReturnFromTheHashtable == NULL || dataItemThatReturnFromTheHashtable->m_Data->role!= UserDefinedType)
+		if (dataItemThatReturnFromTheHashtable == NULL)
 		{
-			//ERROR THERE IS NO SUB TYPE INSIDE ALL THE BLOCK
+			printTypeNotDefined(currentToken->lineNumber, tempDataItem->m_Data->basicSubTypeName);
+		}
+		else if (dataItemThatReturnFromTheHashtable->m_Data->role == Variable)
+		{
+			fprintf(yyoutSemantic, "(Line %d) Unexpected Variable, Lexeme : %s\n", currentToken->lineNumber, dataItemThatReturnFromTheHashtable->m_Data->name);
 		}
 		else
 		{
 			tempDataItem->m_Data->subType = dataItemThatReturnFromTheHashtable;
+			DataItem* temp = tempDataItem->m_Data->subType;
 			insert(top(stack), tempDataItem);
 		}
 	}
@@ -1089,7 +1068,6 @@ DataItem* searchInsideHashTableIfTheSubTypeExist(int i_Key)
 		if (currentDataItem != NULL)
 		{
 			isIdExsitsInAllHashTables = 1;
-			//tempDataItem->m_Data->subType = currentDataItem;
 		}
 		push(tempStack, tempHashTable);
 	}
@@ -1109,18 +1087,6 @@ DataItem* checkIfIdExists(int i_Key)
 	return isFound;
 }
 
-void printTypeNotDefined(int i_Line, char* i_Lexeme)
-{
-	sizeOfTokensInCommandLine = 0;
-	fprintf(yyoutSemantic, "(Line %d) Type %s not Defined .\n", i_Line, i_Lexeme);
-}
-
-void printDiffrentTypes(int i_Line, char* i_TypeFirst, char* i_TypeSecond)
-{
-	sizeOfTokensInCommandLine = 0;
-	fprintf(yyoutSemantic, "(Line %d) Inconsistency of types in assignment: left side is of type %s, while right side is of type %s.\n", i_Line, i_TypeFirst, i_TypeSecond);
-}
-
 void assignCurrentTokenToCommands()
 {
 	currentCommandLine = realloc(currentCommandLine, (++sizeOfTokensInCommandLine)*sizeof(Token));
@@ -1128,7 +1094,13 @@ void assignCurrentTokenToCommands()
 	currentCommandLine[sizeOfTokensInCommandLine - 1].kind = currentToken->kind;
 	currentCommandLine[sizeOfTokensInCommandLine - 1].lineNumber = currentToken->lineNumber;
 }
-
+void assignInWhenSemiColon()
+{
+	currentCommandLine = realloc(currentCommandLine, (++sizeOfTokensInCommandLine) * sizeof(Token));
+	currentCommandLine[sizeOfTokensInCommandLine - 1].lexeme = ';';
+	currentCommandLine[sizeOfTokensInCommandLine - 1].kind = SEPERATION_SIGN_SEMICOLON;
+	currentCommandLine[sizeOfTokensInCommandLine - 1].lineNumber = currentToken->lineNumber;
+}
 void commandsHandlerType()
 {
 	DataItem* currentItem=NULL;
@@ -1144,14 +1116,19 @@ void commandsHandlerType()
 	if (currentCommandLine[0].kind == KEYWORD_FREE)
 	{
 		currentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[1].lexeme));
-		if (currentItem == NULL || currentItem->m_Data->role == UserDefinedType)
+		if (currentItem == NULL)
 		{
-			//ERROR
+			printVarNotDefined(currentCommandLine[1].lineNumber, currentCommandLine[1].lexeme);
+			return;
+		}
+		else if (currentItem->m_Data->role == UserDefinedType)
+		{
+			printExpectedTypeOrVar(currentCommandLine[1], UserDefinedType);
 			return;
 		}
 		if (currentItem->m_Data->categoryOfType != POINTER)
 		{
-			//ERROR
+			printErrorAssignVaribleToPointer(currentCommandLine[1]);
 			return;
 		}
 		currentCommandLine=NULL;
@@ -1159,9 +1136,14 @@ void commandsHandlerType()
 	if (currentCommandLine != NULL)
 	{
 		currentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[indexArray].lexeme));
-		if (currentItem == NULL || currentItem->m_Data->role == UserDefinedType)
+		if (currentItem == NULL)
 		{
-			printTypeNotDefined(currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
+			printVarNotDefined(currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
+			return;
+		}
+		else if (currentItem->m_Data->role == UserDefinedType)
+		{
+			printExpectedTypeOrVar(currentCommandLine[indexArray], UserDefinedType);
 			return;
 		}
 		typeVariable = currentItem->m_Data->typeOfVariable;
@@ -1175,16 +1157,15 @@ void commandsHandlerType()
 			{
 				case Array:
 				{
-					indexArray++;
 					if (currentCommandLine[indexArray].kind != SEPERATION_SIGN_BRACKET_OPEN)
 					{
-						//ERROR
+						printErrorOfArrayAfterVariable(currentCommandLine[indexArray]);
 						return;
 					}
+					indexArray++;
 					indexArray = handleWithIndexesInsideArray(indexArray);
 					if (indexArray == -1)
 					{
-						//ERORR????
 						return;
 					}
 					break;
@@ -1201,15 +1182,33 @@ void commandsHandlerType()
 				}
 				case Basic:
 				{
-					if (currentCommandLine[indexArray].kind == POINTER || currentCommandLine[indexArray].kind == SEPERATION_SIGN_BRACKET_OPEN)
+					if (currentCommandLine[indexArray].kind == POINTER)
 					{
-						printErrorVaiableWrongType(currentCommandLine[indexArray], currentCommandLine[indexArray].kind);
+						printErrorVaiableWrongType(currentCommandLine[indexArray], Pointer);
+						return;
+					}
+					else if (currentCommandLine[indexArray].kind == SEPERATION_SIGN_BRACKET_OPEN)
+					{
+						printErrorVaiableWrongType(currentCommandLine[indexArray], Array);
 						return;
 					}
 					break;
 				}
 			}
 
+		}
+		else
+		{
+			if (currentCommandLine[indexArray].kind == POINTER)
+			{
+				printErrorVaiableWrongType(currentCommandLine[indexArray], Pointer);
+				return;
+			}
+			else if (currentCommandLine[indexArray].kind == SEPERATION_SIGN_BRACKET_OPEN)
+			{
+				printErrorVaiableWrongType(currentCommandLine[indexArray], Array);
+				return;
+			}
 		}
 		switch (currentCommandLine[indexArray].kind)
 		{
@@ -1218,21 +1217,18 @@ void commandsHandlerType()
 				indexArray = handleWithSizeOfKeyword(indexArray);
 				if (indexArray == -1)
 				{
-					//ERORR????
 					return;
 				}
-				if (isLeftCommandSideWithRoof == 0)
+				if (isLeftCommandSideWithRoof == 0 && currentCategoryType==Pointer)
 				{
-					//ERROR
+					printErrorOfPointerAfterVariable(currentCommandLine[indexArray - 2]);	
 					return;
 				}
-
 				if (strcmp(currentKindTypeOfAllTheCommands, integerType) != 0)
 				{
-					//ERROR DIFFRENT TYPE
+					printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, integerType);
 					return;
-				}
-				
+				}				
 				break;
 			}
 			case KEYWORD_MALLOC:
@@ -1241,20 +1237,19 @@ void commandsHandlerType()
 				{
 					if (isLeftCommandSideWithRoof == 1)
 					{
-						//EROR
+						fprintf(yyoutSemantic, "(Line %d)  Trying to allocate memory to %s that is not pointer .\n", currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
 						return;
 					}
 					indexArray++;
 					indexArray = handleWithSizeOfKeywordInsideTheKeywordMalloc(indexArray, currentKindTypeOfAllTheCommands);
 					if (indexArray == -1)
 					{
-						//ERORR????
 						return;
 					}				
 				}
 				else
 				{
-					//ERROR
+					fprintf(yyoutSemantic, "(Line %d)  Trying to allocate memory to %s that is not pointer .\n", currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
 					return;
 				}
 				break;
@@ -1268,7 +1263,7 @@ void commandsHandlerType()
 					{
 						if (currentKindOfToken != UNARY_OP_AMP && currentKindOfToken != ID)
 						{
-							//Error diffrent type
+							fprintf(yyoutSemantic, "(Line %d)  cannot assign %s to type of pointer .\n", currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
 							return;
 						}
 					}
@@ -1295,9 +1290,14 @@ void commandsHandlerType()
 						case ID:
 						{
 							currentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[indexArray].lexeme));
-							if (currentItem == NULL || currentItem->m_Data->role == UserDefinedType)
+							if (currentItem == NULL )
 							{
-								printTypeNotDefined(currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
+								printVarNotDefined(currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
+								return;
+							}
+							else if (currentItem->m_Data->role == UserDefinedType)
+							{
+								printExpectedTypeOrVar(currentCommandLine[1], UserDefinedType);
 								return;
 							}
 							if (currentItem->m_Data->subType != NULL)
@@ -1312,29 +1312,60 @@ void commandsHandlerType()
 											printErrorAssignVaribleToPointer(currentCommandLine[indexArray]);
 											return;
 										}
+										if (strcmp(currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName) != 0)
+										{
+											printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName);
+											return;
+										}
+										/*
 										if (strcmp(currentItem->m_Data->typeOfVariable, typeVariable) != 0)
 										{
 											printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentItem->m_Data->typeOfVariable, typeVariable);
 											return;
 										}
+										*/
 									}
 									else
 									{
-										if (strcmp(currentKindTypeOfAllTheCommands, currentItem->m_Data->typeOfVariable) != 0)
+										switch (subTypeItem->m_Data->categoryOfType)
 										{
-											printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, currentItem->m_Data->typeOfVariable);
-											return;
+											case Basic:
+											{
+												if (strcmp(currentKindTypeOfAllTheCommands, currentItem->m_Data->typeOfVariable) != 0)
+												{
+													printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, currentItem->m_Data->typeOfVariable);
+													return;
+												}
+												break;
+											}
+
+											case Pointer:
+											{
+												indexArray++;
+												if (currentCommandLine[indexArray].kind != POINTER)
+												{
+													printErrorOfPointerAfterVariable(currentCommandLine[indexArray - 1]);
+													return;
+												}
+												indexArray++;
+											}
+											default:
+											{
+												if (strcmp(currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName) != 0)
+												{
+													printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName);
+													return;
+												}
+											}
 										}
 									}
-
-
 								}
 								else if (subTypeItem->m_Data->categoryOfType == Pointer)
 								{
 									indexArray++;
 									if ((currentCommandLine[indexArray].kind != POINTER))
 									{
-										printErrorOfPointerAfterVariableInTheRightSide(currentCommandLine[indexArray]);
+										printErrorOfPointerAfterVariable(currentCommandLine[indexArray]);
 										return;
 									}
 									if (strcmp(currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName) != 0)
@@ -1345,13 +1376,21 @@ void commandsHandlerType()
 								}
 								else if (subTypeItem->m_Data->categoryOfType == Array)
 								{
-									// error if there is no	`[`
+									indexArray++;
+									if (currentCommandLine[indexArray].kind != SEPERATION_SIGN_BRACKET_OPEN)
+									{
+										printErrorOfArrayAfterVariable(currentCommandLine[indexArray]);
+										return;
+									}
 									indexArray++;
 									indexArray = handleWithIndexesInsideArray(indexArray);
 									if (indexArray == -1)
 									{
-										//ERORR????
 										return;
+									}
+									if (currentCommandLine[indexArray].kind == SEPERATION_SIGN_SEMICOLON)
+									{
+										indexArray--;
 									}
 								}
 								else if (subTypeItem->m_Data->categoryOfType == Basic)
@@ -1361,12 +1400,16 @@ void commandsHandlerType()
 										printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName);
 										return;
 									}
-									if (currentCommandLine[indexArray + 1].kind == POINTER || currentCommandLine[indexArray + 1].kind == SEPERATION_SIGN_BRACKET_OPEN)
+									if (currentCommandLine[indexArray + 1].kind == POINTER)
 									{
-										printErrorVaiableWrongType(currentCommandLine[indexArray], currentCommandLine[indexArray + 1].kind);
+										printErrorVaiableWrongType(currentCommandLine[indexArray], Pointer);
 										return;
 									}
-
+									else if (currentCommandLine[indexArray + 1].kind == SEPERATION_SIGN_BRACKET_OPEN)
+									{
+										printErrorVaiableWrongType(currentCommandLine[indexArray], Array);
+										return;
+									}
 								}
 							}
 							else
@@ -1375,7 +1418,7 @@ void commandsHandlerType()
 								{
 									if (strcmp(currentItem->m_Data->typeOfVariable, realType) != 0)
 									{
-										//ERROR DIFFRENT TYPE
+										printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentItem->m_Data->typeOfVariable, realType);
 										return;
 									}
 								}
@@ -1383,7 +1426,7 @@ void commandsHandlerType()
 								{
 									if (strcmp(currentItem->m_Data->typeOfVariable, integerType) != 0)
 									{
-										//ERROR DIFFRENT TYPE
+										printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentItem->m_Data->typeOfVariable, integerType);
 										return;
 									}
 								}
@@ -1395,18 +1438,19 @@ void commandsHandlerType()
 							indexArray++;
 							if (isLeftCommandSideWithRoof == 1)
 							{
-								//Error because there was roof and & come after
+								fprintf(yyoutSemantic, "(Line %d) Cannot assign adress to pointer that point to variable .\n", currentCommandLine[indexArray].lineNumber);
 								return;
 							}
 							currentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[indexArray].lexeme));
 							if (currentItem == NULL)
 							{
-								printTypeNotDefined(currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
+								printVarNotDefined(currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
 								return;
 							}
 							else if (currentItem->m_Data->role == UserDefinedType)
 							{
 								printExpectedTypeOrVar(currentCommandLine[indexArray],currentItem->m_Data->role);
+								return;
 							}
 							if (strcmp(currentItem->m_Data->typeOfVariable, currentKindTypeOfAllTheCommands) != 0)
 							{
@@ -1419,17 +1463,31 @@ void commandsHandlerType()
 								subTypeItem = currentItem->m_Data->subType;
 								if (strcmp(currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName) != 0)
 								{
-									//ERROR DIFFRENT TYPE
+									printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentKindTypeOfAllTheCommands, subTypeItem->m_Data->basicSubTypeName);
 									return;
 								}
 							}
 							else
 							{
-								//CHECK
+								if (strcmp(currentKindTypeOfAllTheCommands, realType) == 0)
+								{
+									if (strcmp(currentItem->m_Data->typeOfVariable, realType) != 0)
+									{
+										printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentItem->m_Data->typeOfVariable, realType);
+										return;
+									}
+								}
+								else
+								{
+									if (strcmp(currentItem->m_Data->typeOfVariable, integerType) != 0)
+									{
+										printDiffrentTypes(currentCommandLine[indexArray].lineNumber, currentItem->m_Data->typeOfVariable, integerType);
+										return;
+									}
+								}
 							}
 							break;
 						}
-
 					}
 					indexArray++;
 				}
@@ -1455,18 +1513,23 @@ int handleWithIndexesInsideArray(int i_IndexInsideArray)
 			case ID:
 			{
 				CurrentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[i_IndexInsideArray].lexeme));
-				if (CurrentItem == NULL || CurrentItem->m_Data->role == UserDefinedType)
+				if (CurrentItem == NULL)
 				{
-					//printTypeNotDefined(currentCommandLine[0].lineNumber, currentCommandLine[0].lexeme);
+					printVarNotDefined(currentCommandLine[i_IndexInsideArray].lineNumber, currentCommandLine[i_IndexInsideArray].lexeme);
 					return -1;
 				}
-				if (strcmp(CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_INTEGER)))
+				else if (CurrentItem->m_Data->role == UserDefinedType)
+				{
+					printExpectedTypeOrVar(currentCommandLine[i_IndexInsideArray], CurrentItem->m_Data->role);
+					return -1;
+				}
+				if (strcmp(CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_INTEGER))==0)
 				{
 					i_IndexInsideArray++;
 				}
-				else if (strcmp(CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL)))
+				else if (strcmp(CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL))==0)
 				{
-					// ERRORRRR
+					printDiffrentTypes(currentCommandLine[i_IndexInsideArray].lineNumber, CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL));
 					return -1;
 				}
 				else
@@ -1479,21 +1542,20 @@ int handleWithIndexesInsideArray(int i_IndexInsideArray)
 						{
 							if (currentCommandLine[i_IndexInsideArray + 1].kind != POINTER)
 							{
-								//Error
+								printErrorOfPointerAfterVariable(currentCommandLine[i_IndexInsideArray]);
 								return -1;
 							}
 							i_IndexInsideArray++;
-
 						}
 						case Basic:
 						{
-							if (strcmp(subTypeItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_INTEGER)))
+							if (strcmp(subTypeItem->m_Data->basicSubTypeName, stringFromeTOKENS(KEYWORD_INTEGER))==0)
 							{
 								i_IndexInsideArray++;
 							}
-							else if (strcmp(subTypeItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL)))
+							else if (strcmp(subTypeItem->m_Data->basicSubTypeName, stringFromeTOKENS(KEYWORD_REAL))==0)
 							{
-								// ERRORRRR
+								printDiffrentTypes(currentCommandLine[i_IndexInsideArray].lineNumber, subTypeItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL));
 								return -1;
 							}
 							break;
@@ -1511,26 +1573,42 @@ int handleWithIndexesInsideArray(int i_IndexInsideArray)
 				}
 				break;
 			}
+			case KEYWORD_SIZE_OF:
+			{
+				i_IndexInsideArray= handleWithSizeOfKeyword(i_IndexInsideArray);
+				if (i_IndexInsideArray == -1)
+				{
+					return -1;
+				}
+				i_IndexInsideArray++;
+				break;
+			}
 			default:
 			{
-				//ERRPR
+				indexArayIsNotIntger(currentCommandLine[i_IndexInsideArray]);
 				return -1;
 			}
 		}
 	}
-
 	return ++i_IndexInsideArray;
 }
 
 int handleWithSizeOfKeyword(int i_IndexInsideSizeofKeyword)
 {
 	i_IndexInsideSizeofKeyword++;
+	Token currentToken = currentCommandLine[i_IndexInsideSizeofKeyword];
 	char* integerType = stringFromeTOKENS(KEYWORD_INTEGER);
 	DataItem* currentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[i_IndexInsideSizeofKeyword].lexeme));
-	if (currentItem == NULL || currentItem->m_Data->role == Variable)
-	{
-		return -1;
-	}
+	if (currentItem == NULL)
+		{
+		printTypeNotDefined(currentToken.lineNumber, currentToken.lexeme);
+			return -1;
+		}
+	else if (currentItem->m_Data->role == Variable)
+		{
+		  fprintf(yyoutSemantic, "(Line %d) %s is not a type name\n", currentToken.lineNumber, currentToken.lexeme);
+			return -1;
+		}
 	return i_IndexInsideSizeofKeyword;
 }
 
@@ -1539,14 +1617,19 @@ int handleWithSizeOfKeywordInsideTheKeywordMalloc(int i_IndexInsideSizeofKeyword
 	i_IndexInsideSizeofKeyword++;
 	char* integerType = stringFromeTOKENS(KEYWORD_INTEGER);
 	DataItem* currentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[i_IndexInsideSizeofKeyword].lexeme));
-	if (currentItem == NULL || currentItem->m_Data->role == Variable)
+	if (currentItem == NULL)
 	{
-		//ERROR TYPE
+		printTypeNotDefined(currentCommandLine[i_IndexInsideSizeofKeyword].lineNumber, currentCommandLine[i_IndexInsideSizeofKeyword].lexeme);
 		return -1;
 	}
-	if (strcmp(currentItem->m_Data->basicSubTypeName, i_CurrentType) != 0)
+	else if (currentItem->m_Data->role == Variable)
 	{
-		//ERROR TYPE
+		printExpectedTypeOrVar(currentCommandLine[i_IndexInsideSizeofKeyword], Variable);
+		return -1;
+	}
+	if (strcmp(currentItem->m_Data->name, i_CurrentType) != 0)
+	{
+		printDiffrentTypes(currentCommandLine[i_IndexInsideSizeofKeyword].lineNumber, currentItem->m_Data->basicSubTypeName, i_CurrentType);
 		return -1;
 	}
 	return i_IndexInsideSizeofKeyword;
@@ -1557,23 +1640,28 @@ void printExpectedTypeOrVar(Token i_CurrentToken,eRoleTypes i_UnexpectedCurrentR
 
 	if (i_UnexpectedCurrentRole == Variable)
 	{
-		fprintf(yyoutSemantic, "(Line %d) Unexpected Variable, Lexeme : %s", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+		fprintf(yyoutSemantic, "(Line %d) Unexpected Variable, Lexeme : %s\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
 	}
 	else
 	{
-		fprintf(yyoutSemantic, "(Line %d) Unexpected User defined type, Lexeme : %s", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+		fprintf(yyoutSemantic, "(Line %d) Unexpected User defined type, Lexeme : %s\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
 	}
 
 }
 
 void printErrorAssignVaribleToPointer(Token i_CurrentToken)
 {
-	fprintf(yyoutSemantic, "(Line %d) Trying to assign Variable:%s into Pointer,Need to write '&' before the variable", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+	fprintf(yyoutSemantic, "(Line %d) Trying to assign Variable:%s into Pointer,Need to write '&' before the variable\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
 }
 
-void printErrorOfPointerAfterVariableInTheRightSide(Token i_CurrentToken)
+void printErrorOfPointerAfterVariable(Token i_CurrentToken)
 {
-	fprintf(yyoutSemantic, "(Line %d) Need to write '^' after the variable : %s", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+	fprintf(yyoutSemantic, "(Line %d) Need to write '^' after the variable : %s\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+}
+
+void printErrorOfArrayAfterVariable(Token i_CurrentToken)
+{
+	fprintf(yyoutSemantic, "(Line %d) Need to write '[X]' after the variable : %s\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
 }
 
 void printErrorVaiableWrongType(Token i_CurrentToken, eCategoryOfType i_UnexpectedCategory)
@@ -1584,15 +1672,84 @@ void printErrorVaiableWrongType(Token i_CurrentToken, eCategoryOfType i_Unexpect
 	{
 		case Basic:
 		{
-			fprintf(yyoutSemantic, "(Line %d) The variable:%s is not of Basic type", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+			fprintf(yyoutSemantic, "(Line %d) The variable:%s is not of Basic type\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+			break;
 		}
 		case Pointer:
 		{
-			fprintf(yyoutSemantic, "(Line %d) The variable:%s is not of Pointer type", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+			fprintf(yyoutSemantic, "(Line %d) The variable:%s is not of Pointer type\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+			break;
 		}
 		case Array:
 		{
-			fprintf(yyoutSemantic, "(Line %d) The variable:%s is not of Array type", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+			fprintf(yyoutSemantic, "(Line %d) The variable:%s is not of Array type\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+			break;
 		}
 	}
+}
+
+void printTypeNotDefined(int i_Line, char* i_Lexeme)
+{
+	sizeOfTokensInCommandLine = 0;
+	fprintf(yyoutSemantic, "(Line %d) Type %s not Defined .\n", i_Line, i_Lexeme);
+}
+
+void printVarNotDefined(int i_Line, char* i_Lexeme)
+{
+	sizeOfTokensInCommandLine = 0;
+	fprintf(yyoutSemantic, "(Line %d) Var %s not Defined .\n", i_Line, i_Lexeme);
+}
+
+void printDiffrentTypes(int i_Line, char* i_TypeFirst, char* i_TypeSecond)
+{
+	sizeOfTokensInCommandLine = 0;
+	fprintf(yyoutSemantic, "(Line %d) Inconsistency of types in assignment: left side is of type %s, while right side is of type %s.\n", i_Line, i_TypeFirst, i_TypeSecond);
+}
+
+void indexArayIsNotIntger(Token i_CurrentToken)
+{
+	fprintf(yyoutSemantic, "(Line %d)  %s : is not integer .\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+}
+
+void printErrorOfPtrInsideFree(Token i_CurrentToken)
+{
+	fprintf(yyoutSemantic, "(Line %d)  Tyring to Free %s That's is not a type of pointer.\n", i_CurrentToken.lineNumber, i_CurrentToken.lexeme);
+}
+
+void duplicateIdInTheSameScope(char* i_NameOfDuplicatedDecleration, int i_LineNumber)
+{
+	fprintf(yyoutSemantic, "(Line %d) duplicated declaration of %s\n", i_LineNumber, i_NameOfDuplicatedDecleration);
+}
+
+void commandsHandlerTypeOfUnrayOpIncrement()
+{
+	DataItem* currentItem = NULL;
+	DataItem* subTypeItem = NULL;
+	int indexArray = 0;
+	char* typeVariable = NULL;
+	char* integerType = stringFromeTOKENS(KEYWORD_INTEGER);
+	char* realType = stringFromeTOKENS(KEYWORD_REAL);
+	currentItem = searchInsideHashTableIfTheSubTypeExist(StringToIntHash(currentCommandLine[indexArray].lexeme));
+	if (currentItem == NULL)
+	{
+		printVarNotDefined(currentCommandLine[indexArray].lineNumber, currentCommandLine[indexArray].lexeme);
+		return;
+	}
+	else if (currentItem->m_Data->role == UserDefinedType)
+	{
+		printExpectedTypeOrVar(currentCommandLine[indexArray], UserDefinedType);
+		return;
+	}
+	typeVariable = currentItem->m_Data->typeOfVariable;
+	if (currentItem->m_Data->subType != NULL)
+	{
+		subTypeItem = currentItem->m_Data->subType;
+		typeVariable = subTypeItem->m_Data->basicSubTypeName;
+	}
+	if ((strcmp(typeVariable, integerType) != 0))
+	{
+		printDiffrentTypes(currentCommandLine[indexArray].lineNumber, typeVariable, integerType);
+		return;
+	}
+
 }
