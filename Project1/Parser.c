@@ -1529,7 +1529,8 @@ int handleWithIndexesInsideArray(int i_IndexInsideArray)
 				}
 				else if (strcmp(CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL))==0)
 				{
-					printDiffrentTypes(currentCommandLine[i_IndexInsideArray].lineNumber, CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL));
+					indexArayIsNotIntger(currentCommandLine[i_IndexInsideArray]);
+					//printDiffrentTypes(currentCommandLine[i_IndexInsideArray].lineNumber, CurrentItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL));
 					return -1;
 				}
 				else
@@ -1555,7 +1556,8 @@ int handleWithIndexesInsideArray(int i_IndexInsideArray)
 							}
 							else if (strcmp(subTypeItem->m_Data->basicSubTypeName, stringFromeTOKENS(KEYWORD_REAL))==0)
 							{
-								printDiffrentTypes(currentCommandLine[i_IndexInsideArray].lineNumber, subTypeItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL));
+								indexArayIsNotIntger(currentCommandLine[i_IndexInsideArray]);
+								//printDiffrentTypes(currentCommandLine[i_IndexInsideArray].lineNumber, subTypeItem->m_Data->typeOfVariable, stringFromeTOKENS(KEYWORD_REAL));
 								return -1;
 							}
 							break;
